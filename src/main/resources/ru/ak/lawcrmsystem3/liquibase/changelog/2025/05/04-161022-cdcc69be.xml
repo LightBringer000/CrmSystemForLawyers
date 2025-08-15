@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+    <changeSet id="1" author="LawCrmSystem3">
+        <comment>
+            Удаление поля 'EVENT' и добавление полей для детализации взаимодействий в таблицу INTERACTIONS_HISTORY.
+        </comment>
+
+        <dropColumn tableName="INTERACTIONS_HISTORY" columnName="EVENT"/>
+
+        <addColumn tableName="INTERACTIONS_HISTORY">
+            <column name="INTERACTION_TYPE" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <addColumn tableName="INTERACTIONS_HISTORY">
+            <column name="INTERACTION_DATE" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <addColumn tableName="INTERACTIONS_HISTORY">
+            <column name="DETAILS" type="VARCHAR(5000)"/>
+        </addColumn>
+
+        <addColumn tableName="INTERACTIONS_HISTORY">
+            <column name="EVENT_ID" type="UUID"/>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="INTERACTIONS_HISTORY"
+                                 baseColumnNames="EVENT_ID"
+                                 referencedTableName="EVENT"
+                                 referencedColumnNames="ID"
+                                 constraintName="FK_INTERACTIONS_HISTORY_ON_EVENT"/>
+        <createIndex tableName="INTERACTIONS_HISTORY" indexName="IDX_INTERACTIONS_HISTORY_EVENT">
+            <column name="EVENT_ID"/>
+        </createIndex>
+
+        <addColumn tableName="INTERACTIONS_HISTORY">
+            <column name="EMAIL_REQUEST_ID" type="UUID"/>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="INTERACTIONS_HISTORY"
+                                 baseColumnNames="EMAIL_REQUEST_ID"
+                                 referencedTableName="EMAIL_REQUEST"
+                                 referencedColumnNames="ID"
+                                 constraintName="FK_INTERACTIONS_HISTORY_ON_EMAIL_REQUEST"/>
+        <createIndex tableName="INTERACTIONS_HISTORY" indexName="IDX_INTERACTIONS_HISTORY_EMAIL_REQUEST">
+            <column name="EMAIL_REQUEST_ID"/>
+        </createIndex>
+
+        <addColumn tableName="INTERACTIONS_HISTORY">
+            <column name="TASK_ID" type="UUID"/>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="INTERACTIONS_HISTORY"
+                                 baseColumnNames="TASK_ID"
+                                 referencedTableName="TASK_" referencedColumnNames="ID"
+                                 constraintName="FK_INTERACTIONS_HISTORY_ON_TASK"/>
+        <createIndex tableName="INTERACTIONS_HISTORY" indexName="IDX_INTERACTIONS_HISTORY_TASK">
+            <column name="TASK_ID"/>
+        </createIndex>
+
+    </changeSet>
+
+</databaseChangeLog>

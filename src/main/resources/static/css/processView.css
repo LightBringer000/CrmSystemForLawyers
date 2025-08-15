@@ -1,0 +1,878 @@
+/* Основные стили */
+#process-view {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    width: 100%;
+    max-width: none;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.process-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.process-container {
+    width: 100%;
+    max-width: none;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.stages-container {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.process-header, .stages-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.action-btn, .floating-btn {
+    background: #4a6da7;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+}
+
+.action-btn:hover, .floating-btn:hover {
+    background: #3a5a8f;
+}
+
+.floating-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 100;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Список процессов */
+#processes-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+    padding: 16px 0;
+}
+
+.process-item {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border: 1px solid #eaeaea;
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 0.4s ease forwards;
+}
+
+.process-item:hover {
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(-4px);
+    border-color: #d0d0d0;
+}
+
+.process-info {
+    margin-bottom: 16px;
+}
+
+.process-info h4 {
+    margin: 0 0 8px 0;
+    color: #2c3e50;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.process-info p {
+    margin: 0 0 12px 0;
+    color: #7f8c8d;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.process-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.process-status.planned {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+}
+
+.process-status.in_progress {
+    background: #cce5ff;
+    color: #004085;
+    border: 1px solid #b8daff;
+}
+
+.process-status.completed {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.process-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #f0f0f0;
+}
+
+
+
+.view-stages-btn {
+    background: #4a6da7;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    flex-grow: 1;
+    justify-content: center;
+}
+
+.view-stages-btn:hover {
+    background: #3a5a8f;
+    transform: translateY(-1px);
+}
+
+.view-stages-btn i {
+    font-size: 12px;
+    transition: transform 0.2s ease;
+}
+
+.view-stages-btn:hover i {
+    transform: translateX(2px);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    #processes-list {
+        grid-template-columns: 1fr;
+    }
+
+    .process-actions {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .view-stages-btn {
+        width: 100%;
+        order: 1;
+    }
+
+    .edit-process-btn,
+    .delete-process-btn {
+        order: 2;
+        margin: 0 4px;
+    }
+}
+
+/* Список стадий */
+#stages-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.stage-item {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 15px;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: move;
+}
+
+.stage-item:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.stage-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-grow: 1;
+}
+
+.stage-handle {
+    color: #aaa;
+    cursor: grab;
+}
+
+.stage-handle:active {
+    cursor: grabbing;
+}
+
+.stage-status {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.stage-status.planned {
+    background: #ffd700;
+    color: #333;
+}
+
+.stage-status.in_progress {
+    background: #4a6da7;
+    color: white;
+}
+
+.stage-status.completed {
+    background: #28a745;
+    color: white;
+}
+
+.stage-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.edit-process-btn,
+.delete-process-btn {
+    background: none;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #7f8c8d;
+    margin-left: 8px;
+    transition: all 0.2s ease;
+}
+
+.edit-process-btn:hover {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.delete-process-btn:hover {
+    background: #fde8e8;
+    color: #d32f2f;
+}
+
+.edit-process-btn i,
+.delete-process-btn i {
+    font-size: 14px;
+}
+
+/* Анимации */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Модальное окно */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 20px;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 600px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.close-btn {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-btn:hover {
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input[type="text"],
+.form-group textarea,
+.form-group select,
+.form-group input[type="date"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.save-btn, .cancel-btn {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.save-btn {
+    background: #4a6da7;
+    color: white;
+}
+
+.save-btn:hover {
+    background: #3a5a8f;
+}
+
+.cancel-btn {
+    background: #f1f1f1;
+    color: #333;
+}
+
+.cancel-btn:hover {
+    background: #ddd;
+}
+
+/* Сообщения */
+.no-data-message {
+    text-align: center;
+    padding: 30px;
+    color: #666;
+    font-size: 16px;
+}
+
+.loading {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
+
+.error {
+    text-align: center;
+    padding: 20px;
+    color: #dc3545;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.process-item, .stage-item {
+    animation: fadeIn 0.3s ease;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    #processes-list {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+}
+
+
+/* Стили для модальных окон */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 20px;
+    border-radius: 5px;
+    width: 50%;
+    max-width: 600px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.close-btn {
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.save-btn, .cancel-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.save-btn {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.cancel-btn {
+    background-color: #f44336;
+    color: white;
+}
+
+.add-process-btn {
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 15px;
+    font-size: 14px;
+}
+
+.add-process-btn:hover {
+    background-color: #45a049;
+}
+
+.add-process-btn i {
+    margin-right: 5px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--lumo-secondary-text-color);
+}
+
+.empty-state i {
+    font-size: 48px;
+    color: var(--lumo-contrast-30pct);
+    margin-bottom: 16px;
+}
+
+.empty-state p {
+    margin: 16px 0 24px;
+    font-size: 16px;
+}
+
+#add-first-stage-btn {
+    margin-top: 16px;
+}
+
+#stages-container {
+  transition: opacity 0.3s;
+}
+
+.error-message {
+  color: #d32f2f;
+  padding: 10px;
+  background: #ffebee;
+  margin: 10px 0;
+}
+
+.stage-order {
+    font-weight: bold;
+    margin-right: 8px;
+    color: var(--lumo-secondary-text-color);
+    min-width: 20px;
+    text-align: right;
+}
+
+.stage-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    background-color: #fff;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stage-item.dragging {
+    opacity: 0.8;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.stage-info {
+    display: flex;
+    align-items: flex-start;
+    flex-grow: 1;
+    gap: 12px;
+}
+
+.stage-order-index {
+    font-size: 14px;
+    font-weight: bold;
+    color: #666;
+    min-width: 24px;
+    text-align: center;
+}
+
+.stage-handle {
+    cursor: grab;
+    color: #999;
+    padding: 4px;
+    margin-right: 4px;
+}
+
+.stage-handle:active {
+    cursor: grabbing;
+}
+
+.stage-content {
+    flex-grow: 1;
+}
+
+.stage-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.stage-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+}
+
+.stage-description {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.stage-dates {
+    display: flex;
+    gap: 16px;
+    font-size: 13px;
+}
+
+.stage-date {
+    display: flex;
+    gap: 4px;
+}
+
+.date-label {
+    color: #888;
+}
+
+.date-value {
+    color: #444;
+    font-weight: 500;
+}
+
+/* Убираем дублирование иконок в стилях */
+.edit-stage-btn::before,
+.delete-stage-btn::before {
+    display: none; /* Убираем дублирующиеся псевдоэлементы */
+}
+
+/* Оставляем только эти стили для кнопок действий */
+.stage-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: 12px;
+}
+
+.stage-action-btn {
+    background: #f5f5f5;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.stage-action-btn:hover {
+    transform: scale(1.1);
+}
+
+/* Стили для статусов */
+.stage-status-badge {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    margin-left: 12px;
+}
+
+.stage-status-badge.planned {
+    background-color: #e0e0e0;
+    color: #424242;
+}
+
+.stage-status-badge.in-progress {
+    background-color: #bbdefb;
+    color: #0d47a1;
+}
+
+.stage-status-badge.completed {
+    background-color: #c8e6c9;
+    color: #1b5e20;
+}
+
+.modal {
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.modal-content {
+    transition: transform 0.3s ease;
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--lumo-primary-color);
+    margin-right: 10px;
+    padding: 0;
+    font-size: 16px;
+}
+
+.back-btn:hover {
+    color: var(--lumo-primary-color-50pct);
+}
+
+.stages-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.stages-actions {
+    display: flex;
+    gap: 10px;
+}
+
+
+
+
+
+
+/* Увеличиваем размер окна процессов */
+#process-view {
+    width: 100%;
+    max-width: 100%; /* Убираем ограничение 1400px */
+    box-sizing: border-box;
+    padding: 30px; /* Увеличили отступы */
+}
+
+
+/* Стили для иконок действий */
+.edit-stage-btn, .delete-stage-btn {
+    background: #f5f5f5;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.edit-stage-btn:hover {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.delete-stage-btn:hover {
+    background: #ffebee;
+    color: #d32f2f;
+}
+
+/* Иконки Font Awesome (если используются) */
+.edit-stage-btn::before {
+    content: "\f044"; /* иконка редактирования */
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+}
+
+.delete-stage-btn::before {
+    content: "\f2ed"; /* иконка удаления */
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+}
+
+/* Убираем лишние стили для иконок */
+.edit-stage-btn .material-icons,
+.delete-stage-btn .material-icons {
+    font-size: 18px;
+}
+
+/* Альтернатива для Material Icons */
+.edit-stage-btn .material-icons {
+    font-size: 18px;
+}
+
+.delete-stage-btn .material-icons {
+    font-size: 18px;
+}
+
+/* Улучшаем видимость при наведении */
+.stage-actions {
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.stage-item:hover .stage-actions {
+    opacity: 1;
+}
+
+/* Увеличиваем модальное окно */
+.modal-content {
+    max-width: 800px; /* Увеличили с 600px */
+    width: 90%; /* Более адаптивно */
+}
+
+/* Адаптивные правки для больших экранов */
+@media (min-width: 1600px) {
+    #process-view {
+        max-width: 1600px;
+    }
+
+    #processes-list {
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    }
+}
+
+/* Улучшаем визуальную иерархию */
+.process-header h2, .stages-header h2 {
+    font-size: 24px;
+    color: #333;
+    margin: 0;
+}
+
+/* Дополнительные стили для кнопок */
+.action-btn i, .floating-btn i {
+    margin-right: 6px;
+}

@@ -1,0 +1,97 @@
+<div>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление стадиями процесса</title>
+    <link rel="stylesheet" type="text/css" href="/css/caseStageView.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+<div id="CaseStageView">
+    <!-- Контейнер для вкладок процессов -->
+    <div id="process-tabs-container" class="process-tabs"></div>
+
+    <div id="process-container" class="process-container">
+        <div class="process-header">
+            <h2>Стадии движения дела</h2>
+            <div class="process-actions">
+                <button id="refresh-stages" class="action-btn">
+                    <i class="fas fa-sync-alt"></i> Обновить
+                </button>
+                <button id="save-order-btn" class="action-btn">
+                    <i class="fas fa-save"></i> Сохранить порядок
+                </button>
+                <button id="new-stage-btn" class="floating-btn">
+                    <i class="fas fa-plus"></i> Добавить стадию
+                </button>
+            </div>
+        </div>
+
+        <div id="stages-list-container">
+        </div>
+
+        <div id="no-stages-message" class="no-stages-message" style="display: none;">
+            Пока нет доступных стадий. Добавьте первую!
+        </div>
+
+        <div id="error-message" class="error-message" style="display: none;">
+            Ошибка при загрузке стадий
+        </div>
+    </div>
+
+    <!-- Модальное окно для создания/редактирования стадии -->
+    <div id="stage-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Новая стадия</h2>
+                <span class="close-btn">&times;</span>
+            </div>
+            <form id="stage-form">
+                <input type="hidden" id="stage-id">
+
+                <div class="form-group">
+                    <label for="stage-name">Название стадии:</label>
+                    <input type="text" id="stage-name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="stage-description">Описание:</label>
+                    <textarea id="stage-description" rows="3"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="stage-status">Статус:</label>
+                    <select id="stage-status" required>
+                        <option value="PLANNED">Запланировано</option>
+                        <option value="IN_PROGRESS">В процессе</option>
+                        <option value="COMPLETED">Завершено</option>
+                        <option value="CANCELLED">Отменено</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="start-date">Дата начала:</label>
+                        <input type="date" id="start-date">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="end-date">Дата окончания:</label>
+                        <input type="date" id="end-date">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="save-btn">Сохранить</button>
+                    <button type="button" class="cancel-btn">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+</div>

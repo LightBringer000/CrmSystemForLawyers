@@ -1,0 +1,17 @@
+version: "3.9"  # Use a recent version of the Docker Compose file format
+
+services:
+  postgres:
+    image: postgres:latest  # Use the latest official Postgres image
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: temple/of/abaddon  # Replace with your desired password
+      POSTGRES_USER: postgres        # Replace with your desired username
+      POSTGRES_DB: crm3          # Replace with your desired database name
+    ports:
+      - "5432:5432"  # Expose port 5432 on the host machine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Persist data to a local volume
+
+volumes:
+  postgres_data:

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
+      title="msg://dealParticipantListView.title"
+      focusComponent="dealParticipantsDataGrid">
+    <data>
+        <collection id="dealParticipantsDc"
+                    class="ru.ak.lawcrmsystem3.entity.DealParticipant">
+            <fetchPlan extends="_base">
+                <property name="deals" fetchPlan="_base"/>
+            </fetchPlan>
+            <loader id="dealParticipantsDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from DealParticipant e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+        <urlQueryParameters>
+            <genericFilter component="genericFilter"/>
+            <pagination component="pagination"/>
+        </urlQueryParameters>
+    </facets>
+    <actions>
+        <action id="selectAction" type="lookup_select"/>
+        <action id="discardAction" type="lookup_discard"/>
+    </actions>
+    <layout>
+        <genericFilter id="genericFilter"
+                       dataLoader="dealParticipantsDl">
+            <properties include=".*"/>
+        </genericFilter>
+        <hbox id="buttonsPanel" classNames="buttons-panel">
+            <button id="createButton" action="dealParticipantsDataGrid.create"/>
+            <button id="editButton" action="dealParticipantsDataGrid.edit"/>
+            <button id="removeButton" action="dealParticipantsDataGrid.remove"/>
+            <simplePagination id="pagination" dataLoader="dealParticipantsDl"/>
+        </hbox>
+        <dataGrid id="dealParticipantsDataGrid"
+                  width="100%"
+                  minHeight="20em"
+                  dataContainer="dealParticipantsDc"
+                  columnReorderingAllowed="true">
+            <actions>
+                <action id="create" type="list_create"/>
+                <action id="edit" type="list_edit"/>
+                <action id="remove" type="list_remove"/>
+            </actions>
+            <columns resizable="true">
+                <column property="uniqueNumber"/>
+                <column property="titleOrName"/>
+                <column property="otherInfo"/>
+                <column property="address"/>
+                <column property="participantStatus"/>
+            </columns>
+        </dataGrid>
+        <hbox id="lookupActions" visible="false">
+            <button id="selectButton" action="selectAction"/>
+            <button id="discardButton" action="discardAction"/>
+        </hbox>
+    </layout>
+</view>

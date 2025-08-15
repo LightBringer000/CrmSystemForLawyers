@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+    <changeSet id="20250706-event-deal-association" author="LawCrmSystem3">
+        <comment>Adding DEAL_ID column to EVENT table and creating a foreign key constraint for Deal association.</comment>
+
+        <addColumn tableName="EVENT">
+            <column name="DEAL_ID" type="UUID">
+                <constraints nullable="true"/> </column>
+        </addColumn>
+
+        <addForeignKeyConstraint baseTableName="EVENT"
+                                 baseColumnNames="DEAL_ID"
+                                 referencedTableName="DEAL"
+                                 referencedColumnNames="ID"
+                                 constraintName="FK_EVENT_ON_DEAL"
+                                 onDelete="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>

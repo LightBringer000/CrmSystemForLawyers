@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+    <changeSet id="1719758400000-1" author="LawCrmSystem3">
+        <comment>Adding DEAL_ID column to TASK_ table and creating a foreign key constraint.</comment>
+
+        <addColumn tableName="TASK_">
+            <column name="DEAL_ID" type="UUID">
+                <constraints nullable="true"/> </column>
+        </addColumn>
+
+        <addForeignKeyConstraint baseTableName="TASK_"
+                                 baseColumnNames="DEAL_ID"
+                                 referencedTableName="DEAL"
+                                 referencedColumnNames="ID"
+                                 constraintName="FK_TASK__ON_DEAL"
+                                 onDelete="SET NULL"/>
+    </changeSet>
+
+</databaseChangeLog>

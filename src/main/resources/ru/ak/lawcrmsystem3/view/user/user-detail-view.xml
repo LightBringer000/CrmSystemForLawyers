@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://userDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="userDc"
+                  class="ru.ak.lawcrmsystem3.entity.User">
+            <fetchPlan extends="_base">
+                <property name="events" fetchPlan="_base"/>
+                <property name="deals" fetchPlan="_base"/>
+                <property name="tasks" fetchPlan="_base"/>
+            </fetchPlan>
+            <loader id="userDl"/>
+            <collection id="eventsDl" property="events"/>
+            <collection id="dealsDc" property="deals"/>
+            <collection id="tasksDc" property="tasks"/>
+        </instance>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <actions>
+        <action id="saveAction" type="detail_saveClose"/>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <layout>
+        <formLayout id="form" dataContainer="userDc">
+            <responsiveSteps>
+                <responsiveStep minWidth="0" columns="1"/>
+                <responsiveStep minWidth="40em" columns="2"/>
+            </responsiveSteps>
+            <textField id="usernameField" property="username"/>
+            <passwordField id="passwordField"
+                           label="msg://ru.ak.lawcrmsystem3.entity/User.password"
+                           required="true"
+                           visible="false"/>
+            <passwordField id="confirmPasswordField"
+                           label="msg://confirmPassword"
+                           required="true"
+                           visible="false"/>
+            <textField id="firstNameField" property="firstName"/>
+            <textField id="lastNameField" property="lastName"/>
+            <textField id="emailField" property="email"/>
+            <checkbox id="activeField" property="active"/>
+            <comboBox id="timeZoneField" property="timeZoneId" clearButtonVisible="true"/>
+        </formLayout>
+        <h4 text="msg://ru.ak.lawcrmsystem3.entity/User.events"/>
+        <hbox id="buttonsPanel" classNames="buttons-panel">
+            <button id="changePasswordBtn" text="msg://changePassword"/>
+            <button action="eventsDataGrid.add"/>
+            <button action="eventsDataGrid.exclude"/>
+        </hbox>
+        <dataGrid id="eventsDataGrid" dataContainer="eventsDl" width="100%" minHeight="20em">
+            <actions>
+                <action id="add" type="list_add"/>
+                <action id="exclude" type="list_exclude"/>
+            </actions>
+            <columns>
+                <column property="eventTitle"/>
+                <column property="startDate"/>
+                <column property="endDate"/>
+            </columns>
+        </dataGrid>
+        <h4 text="msg://ru.ak.lawcrmsystem3.entity/User.deals"/>
+        <hbox id="buttonsPanel2" classNames="buttons-panel">
+            <button action="dealsDataGrid.add"/>
+            <button action="dealsDataGrid.exclude"/>
+        </hbox>
+        <dataGrid id="dealsDataGrid" dataContainer="dealsDc" width="100%" minHeight="20em">
+            <actions>
+                <action id="add" type="list_add"/>
+                <action id="exclude" type="list_exclude"/>
+            </actions>
+            <columns>
+                <column property="title"/>
+                <column property="dealNumber"/>
+                <column property="startedAt"/>
+                <column property="finishedAt"/>
+                <column property="description"/>
+                <column property="dealStatus"/>
+            </columns>
+        </dataGrid>
+        <h4 text="msg://ru.ak.lawcrmsystem3.entity/User.tasks"/>
+        <hbox id="buttonsPanel3" classNames="buttons-panel">
+            <button action="tasksDataGrid.add"/>
+            <button action="tasksDataGrid.exclude"/>
+        </hbox>
+        <dataGrid id="tasksDataGrid" dataContainer="tasksDc" width="100%" minHeight="20em">
+            <actions>
+                <action id="add" type="list_add"/>
+                <action id="exclude" type="list_exclude"/>
+            </actions>
+            <columns>
+                <column property="taskPriority"/>
+                <column property="taskTitle"/>
+                <column property="deadline"/>
+                <column property="taskStatus"/>
+            </columns>
+        </dataGrid>
+        <hbox id="detailActions">
+            <button id="saveAndCloseButton" action="saveAction"/>
+            <button id="closeButton" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

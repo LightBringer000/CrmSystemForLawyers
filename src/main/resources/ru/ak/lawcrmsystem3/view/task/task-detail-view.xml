@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://taskDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="taskDc"
+                  class="ru.ak.lawcrmsystem3.entity.Task">
+            <fetchPlan extends="_base">
+                <property name="responsibleLawyers" fetchPlan="_base"/>
+                <property name="client" fetchPlan="_base"/>
+                <property name="deal" fetchPlan="_base"/>
+                <property name="documents" fetchPlan="_base"/>
+            </fetchPlan>
+            <loader id="taskDl"/>
+            <collection id="responsibleLawyersDc" property="responsibleLawyers"/>
+            <collection id="documentsDc" property="documents"/>
+        </instance>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <actions>
+        <action id="saveAction" type="detail_saveClose"/>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <layout>
+        <formLayout id="form" dataContainer="taskDc">
+            <responsiveSteps>
+                <responsiveStep minWidth="0" columns="1"/>
+                <responsiveStep minWidth="40em" columns="2"/>
+            </responsiveSteps>
+            <select id="taskPriorityField" property="taskPriority"/>
+            <textArea id="taskTitleField" height="9.5em" property="taskTitle"/>
+            <dateTimePicker id="deadlineField" property="deadline"/>
+            <select id="taskStatusField" property="taskStatus"/>
+
+            <entityPicker id="clientField" property="client">
+                <actions>
+                    <action id="entityLookup" type="entity_lookup"/>
+                    <action id="entityClear" type="entity_clear"/>
+                </actions>
+            </entityPicker>
+
+            <entityPicker id="dealField" property="deal">
+                <actions>
+                    <action id="entityLookup" type="entity_lookup"/>
+                    <action id="entityClear" type="entity_clear"/>
+                </actions>
+            </entityPicker>
+
+        </formLayout>
+        <hr/>
+        <h4 text="msg://ru.ak.lawcrmsystem3.entity/Task.responsibleLawyers"/>
+        <hbox id="responsibleLawyersButtonsPanel" classNames="buttons-panel">
+            <button action="responsibleLawyersDataGrid.add"/>
+            <button action="responsibleLawyersDataGrid.exclude"/>
+        </hbox>
+        <dataGrid id="responsibleLawyersDataGrid" dataContainer="responsibleLawyersDc" width="100%" minHeight="20em">
+            <actions>
+                <action id="add" type="list_add"/>
+                <action id="exclude" type="list_exclude"/>
+            </actions>
+            <columns>
+                <column property="firstName"/>
+                <column property="lastName"/>
+                <column property="username"/>
+                <column property="email"/>
+                <column property="active"/>
+                <column property="timeZoneId"/>
+            </columns>
+        </dataGrid>
+
+        <hr/>
+        <h4 text="msg://ru.ak.lawcrmsystem3.entity/Task.documents"/>
+        <hbox id="documentsButtonsPanel" classNames="buttons-panel">
+            <button action="documentsDataGrid.add"/>     <button action="documentsDataGrid.edit"/>    <button action="documentsDataGrid.exclude"/> <button action="documentsDataGrid.remove"/>  </hbox>
+        <dataGrid id="documentsDataGrid" dataContainer="documentsDc" width="100%" minHeight="20em">
+            <actions>
+                <action id="add" type="list_add"/>     <action id="edit" type="list_edit"/>
+                <action id="exclude" type="list_exclude"/> <action id="remove" type="list_remove"/>
+            </actions>
+            <columns>
+                <column property="title"/>
+                <column property="file"/>
+                <column property="mimeType"/>
+            </columns>
+        </dataGrid>
+
+        <hbox id="detailActions">
+            <button id="saveAndCloseButton" action="saveAction"/>
+            <button id="closeButton" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

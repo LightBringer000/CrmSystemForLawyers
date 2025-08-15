@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+
+    <changeSet id="20240325-00-add-client-id-columns" author="yourName">
+        <addColumn tableName="TASK_">
+            <column name="CLIENT_ID" type="UUID"/>
+        </addColumn>
+        <addColumn tableName="EVENT">
+            <column name="CLIENT_ID" type="UUID"/>
+        </addColumn>
+        <addColumn tableName="EMAIL_REQUEST">
+            <column name="CLIENT_ID" type="UUID"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="20240325-04-add-client-id-indexes" author="yourName">
+        <createIndex tableName="TASK_" indexName="IDX_TASK_CLIENT">
+            <column name="CLIENT_ID"/>
+        </createIndex>
+        <createIndex tableName="EVENT" indexName="IDX_EVENT_CLIENT">
+            <column name="CLIENT_ID"/>
+        </createIndex>
+        <createIndex tableName="EMAIL_REQUEST" indexName="IDX_EMAIL_REQUEST_CLIENT">
+            <column name="CLIENT_ID"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="20240325-01-add-task-client-fk" author="LawCrmSystem3">
+        <addForeignKeyConstraint
+                baseTableName="TASK_"
+                baseColumnNames="CLIENT_ID"
+                constraintName="FK_TASK_CLIENT"
+                referencedTableName="CLIENT"
+                referencedColumnNames="ID"
+                onDelete="SET NULL"
+                onUpdate="RESTRICT"/>
+    </changeSet>
+
+    <changeSet id="20240325-02-add-event-client-fk" author="LawCrmSystem3">
+        <addForeignKeyConstraint
+                baseTableName="EVENT"
+                baseColumnNames="CLIENT_ID"
+                constraintName="FK_EVENT_CLIENT"
+                referencedTableName="CLIENT"
+                referencedColumnNames="ID"
+                onDelete="SET NULL"
+                onUpdate="RESTRICT"/>
+    </changeSet>
+
+    <changeSet id="20240325-03-add-email-request-client-fk" author="LawCrmSystem3">
+        <addForeignKeyConstraint
+                baseTableName="EMAIL_REQUEST"
+                baseColumnNames="CLIENT_ID"
+                constraintName="FK_EMAIL_REQUEST_CLIENT"
+                referencedTableName="CLIENT"
+                referencedColumnNames="ID"
+                onDelete="SET NULL"
+                onUpdate="RESTRICT"/>
+    </changeSet>
+
+</databaseChangeLog>

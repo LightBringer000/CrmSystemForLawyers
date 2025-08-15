@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
+      title="msg://legalDocumentDataListView.title"
+      focusComponent="legalDocumentDatasDataGrid">
+    <data>
+        <collection id="legalDocumentDatasDc"
+                    class="ru.ak.lawcrmsystem3.entity.LegalDocumentData">
+            <fetchPlan extends="_base"/>
+            <loader id="legalDocumentDatasDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from LegalDocumentData e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+        <urlQueryParameters>
+            <genericFilter component="genericFilter"/>
+            <pagination component="pagination"/>
+        </urlQueryParameters>
+    </facets>
+    <actions>
+        <action id="selectAction" type="lookup_select"/>
+        <action id="discardAction" type="lookup_discard"/>
+    </actions>
+    <layout>
+        <genericFilter id="genericFilter"
+                       dataLoader="legalDocumentDatasDl">
+            <properties include=".*"/>
+        </genericFilter>
+        <hbox id="buttonsPanel" classNames="buttons-panel">
+            <button id="createButton" action="legalDocumentDatasDataGrid.createAction"/>
+            <button id="editButton" action="legalDocumentDatasDataGrid.editAction"/>
+            <button id="removeButton" action="legalDocumentDatasDataGrid.removeAction"/>
+            <simplePagination id="pagination" dataLoader="legalDocumentDatasDl"/>
+        </hbox>
+        <dataGrid id="legalDocumentDatasDataGrid"
+                  width="100%"
+                  minHeight="20em"
+                  dataContainer="legalDocumentDatasDc"
+                  columnReorderingAllowed="true">
+            <actions>
+                <action id="createAction" type="list_create"/>
+                <action id="editAction" type="list_edit"/>
+                <action id="removeAction" type="list_remove"/>
+            </actions>
+            <columns resizable="true">
+                <column property="to"/>
+                <column property="from"/>
+                <column property="participants"/>
+                <column property="otherInfo"/>
+                <column property="title"/>
+                <column property="content"/>
+                <column property="requests"/>
+                <column property="attachments"/>
+            </columns>
+        </dataGrid>
+        <hbox id="lookupActions" visible="false">
+            <button id="selectButton" action="selectAction"/>
+            <button id="discardButton" action="discardAction"/>
+        </hbox>
+    </layout>
+</view>

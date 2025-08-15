@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
+      xmlns:layout="http://jmix.io/schema/flowui/layout"
+      title="msg://transcriptionRecordListView.title"
+      focusComponent="transcriptionRecordsDataGrid">
+    <data>
+        <collection id="transcriptionRecordsDc"
+                    class="ru.ak.lawcrmsystem3.entity.TranscriptionRecord">
+            <fetchPlan extends="_base"/>
+            <loader id="transcriptionRecordsDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from TranscriptionRecord e order by e.createdDate desc]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <layout>
+        <layout:vbox spacing="true" padding="true">
+            <fileStorageUploadField id="fileUpload"
+                                    label="Upload Audio File"
+                                    maxFileSize="10485760"
+                                    acceptedFileTypes="audio/*,.mp3,.wav,.ogg">
+                <uploadButton>
+                    <button text="Select File" theme="primary"/>
+                </uploadButton>
+            </fileStorageUploadField>
+
+            <dataGrid id="transcriptionRecordsDataGrid"
+                      width="100%"
+                      minHeight="20em"
+                      dataContainer="transcriptionRecordsDc">
+                <actions>
+                    <action id="read" type="list_read"/>
+                </actions>
+                <columns>
+                    <column property="createdDate"/>
+                    <column property="status"/>
+                    <column property="textContent"/>
+                </columns>
+            </dataGrid>
+        </layout:vbox>
+    </layout>
+</view>

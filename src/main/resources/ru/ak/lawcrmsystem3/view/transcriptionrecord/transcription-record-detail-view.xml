@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      xmlns:layout="http://jmix.io/schema/flowui/layout"
+      title="msg://transcriptionRecordDetailView.title">
+    <data>
+        <instance id="transcriptionRecordDc"
+                  class="ru.ak.lawcrmsystem3.entity.TranscriptionRecord">
+            <fetchPlan extends="_base"/>
+            <loader id="transcriptionRecordDl"/>
+        </instance>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <layout>
+        <formLayout>
+            <textField id="createdDateField"
+                       dataContainer="transcriptionRecordDc"
+                       property="createdDate"
+                       readonly="true"
+                       width="100%"/>
+
+            <textField id="statusField"
+                       dataContainer="transcriptionRecordDc"
+                       property="status"
+                       readonly="true"
+                       width="100%"/>
+
+            <textArea id="textContentField"
+                      dataContainer="transcriptionRecordDc"
+                      property="textContent"
+                      readonly="true"
+                      width="100%"
+                      height="500px"
+                      classNames="text-content-area"/>
+        </formLayout>
+
+        <hbox width="100%">
+            <button id="downloadPdfButton"
+                    text="Скачать в PDF"
+                    themeNames="error primary"
+                    styleName="margin-bottom: 40px;"/>
+        </hbox>
+
+    </layout>
+</view>

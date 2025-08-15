@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://dealParticipantDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="dealParticipantDc"
+                  class="ru.ak.lawcrmsystem3.entity.DealParticipant">
+            <fetchPlan extends="_base">
+                <property name="deals" fetchPlan="_base"/>
+            </fetchPlan>
+            <loader id="dealParticipantDl"/>
+            <collection id="dealsDc" property="deals"/>
+        </instance>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <actions>
+        <action id="saveAction" type="detail_saveClose"/>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <layout>
+        <formLayout id="form" dataContainer="dealParticipantDc">
+            <responsiveSteps>
+                <responsiveStep minWidth="0" columns="1"/>
+                <responsiveStep minWidth="40em" columns="2"/>
+            </responsiveSteps>
+            <textField id="uniqueNumberField" property="uniqueNumber"/>
+            <textField id="titleOrNameField" property="titleOrName"/>
+            <textField id="otherInfoField" property="otherInfo"/>
+            <textField id="addressField" property="address"/>
+            <textField id="participantStatusField" property="participantStatus"/>
+        </formLayout>
+        <h4 text="msg://ru.ak.lawcrmsystem3.entity/DealParticipant.deals"/>
+        <hbox id="buttonsPanel" classNames="buttons-panel">
+            <button action="dealsDataGrid.add"/>
+            <button action="dealsDataGrid.exclude"/>
+        </hbox>
+        <dataGrid id="dealsDataGrid" dataContainer="dealsDc" width="100%" minHeight="20em">
+            <actions>
+                <action id="add" type="list_add"/>
+                <action id="exclude" type="list_exclude"/>
+            </actions>
+            <columns>
+                <column property="title"/>
+                <column property="dealNumber"/>
+                <column property="startedAt"/>
+                <column property="finishedAt"/>
+                <column property="description"/>
+                <column property="dealStatus"/>
+            </columns>
+        </dataGrid>
+        <hbox id="detailActions">
+            <button id="saveAndCloseButton" action="saveAction"/>
+            <button id="closeButton" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

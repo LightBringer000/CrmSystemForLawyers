@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
+      title="msg://dealListView.title"
+      focusComponent="dealsDataGrid">
+    <data>
+        <collection id="dealsDc"
+                    class="ru.ak.lawcrmsystem3.entity.Deal">
+            <fetchPlan extends="_base">
+                <property name="servicesRendered" fetchPlan="_base"/>
+                <property name="clients" fetchPlan="_base"/>
+                <property name="responsibleLawyer" fetchPlan="_base"/>
+                <property name="relatedDocuments" fetchPlan="_base"/>
+                <property name="dealParticipants" fetchPlan="_base"/>
+            </fetchPlan>
+            <loader id="dealsDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from Deal e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+        <urlQueryParameters>
+            <genericFilter component="genericFilter"/>
+            <pagination component="pagination"/>
+        </urlQueryParameters>
+    </facets>
+    <actions>
+        <action id="selectAction" type="lookup_select"/>
+        <action id="discardAction" type="lookup_discard"/>
+    </actions>
+    <layout>
+        <genericFilter id="genericFilter"
+                       dataLoader="dealsDl">
+            <properties include=".*"/>
+        </genericFilter>
+        <hbox id="buttonsPanel" classNames="buttons-panel">
+            <button id="createButton" action="dealsDataGrid.createAction"/>
+            <button id="editButton" action="dealsDataGrid.editAction"/>
+            <button id="removeButton" action="dealsDataGrid.removeAction"/>
+            <simplePagination id="pagination" dataLoader="dealsDl"/>
+        </hbox>
+        <dataGrid id="dealsDataGrid"
+                  width="100%"
+                  minHeight="20em"
+                  dataContainer="dealsDc"
+                  columnReorderingAllowed="true">
+            <actions>
+                <action id="createAction" type="list_create"/>
+                <action id="editAction" type="list_edit"/>
+                <action id="removeAction" type="list_remove"/>
+            </actions>
+            <columns resizable="true">
+                <column property="title"/>
+                <column property="dealNumber"/>
+                <column property="startedAt"/>
+                <column property="finishedAt"/>
+                <column property="description"/>
+                <column property="dealStatus"/>
+            </columns>
+        </dataGrid>
+        <hbox id="lookupActions" visible="false">
+            <button id="selectButton" action="selectAction"/>
+            <button id="discardButton" action="discardAction"/>
+        </hbox>
+    </layout>
+</view>

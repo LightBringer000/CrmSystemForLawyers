@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://interactionsHistoryDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="interactionsHistoryDc"
+                  class="ru.ak.lawcrmsystem3.entity.InteractionsHistory">
+            <fetchPlan extends="_base">
+                <property name="client" fetchPlan="_base"/>
+                <property name="relatedEvent" fetchPlan="_base"/>
+                <property name="relatedEmail" fetchPlan="_base"/>
+                <property name="relatedTask" fetchPlan="_base"/>
+            </fetchPlan>
+            <loader id="interactionsHistoryDl"/>
+        </instance>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <actions>
+        <action id="saveAction" type="detail_saveClose"/>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <layout>
+        <formLayout id="form" dataContainer="interactionsHistoryDc">
+            <responsiveSteps>
+                <responsiveStep minWidth="0" columns="1"/>
+                <responsiveStep minWidth="40em" columns="2"/>
+            </responsiveSteps>
+            <textField id="interactionTypeField" property="interactionType"/>
+            <textField id="detailsField" property="details"/>
+            <entityPicker id="clientField" property="client">
+                <actions>
+                    <action id="entityLookupAction" type="entity_lookup"/>
+                    <action id="entityClearAction" type="entity_clear"/>
+                </actions>
+            </entityPicker>
+            <entityPicker id="relatedEventField" property="relatedEvent">
+                <actions>
+                    <action id="entityLookupAction" type="entity_lookup"/>
+                    <action id="entityClearAction" type="entity_clear"/>
+                </actions>
+            </entityPicker>
+            <entityPicker id="relatedEmailField" property="relatedEmail">
+                <actions>
+                    <action id="entityLookupAction" type="entity_lookup"/>
+                    <action id="entityClearAction" type="entity_clear"/>
+                </actions>
+            </entityPicker>
+            <entityPicker id="relatedTaskField" property="relatedTask">
+                <actions>
+                    <action id="entityLookupAction" type="entity_lookup"/>
+                    <action id="entityClearAction" type="entity_clear"/>
+                </actions>
+            </entityPicker>
+        </formLayout>
+        <hbox id="detailActions">
+            <button id="saveAndCloseButton" action="saveAction"/>
+            <button id="closeButton" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

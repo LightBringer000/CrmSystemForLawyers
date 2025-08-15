@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+    <changeSet id="create-received-email-table" author="yourname">
+        <createTable tableName="RECEIVED_EMAIL">
+            <column name="ID" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="FROM" type="VARCHAR(255)"/>
+            <column name="SUBJECT" type="VARCHAR(255)"/>
+            <column name="SENT_DATE" type="TIMESTAMP"/>
+            <column name="RECEIVED_DATE" type="TIMESTAMP"/>
+            <column name="TEXT_CONTENT" type="TEXT"/>
+            <column name="UID" type="VARCHAR(255)"/>
+            <column name="HTML_CONTENT" type="TEXT"/>
+
+            <column name="VERSION" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CREATED_BY" type="VARCHAR(50)"/>
+            <column name="CREATED_DATE" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="LAST_MODIFIED_BY" type="VARCHAR(50)"/>
+            <column name="LAST_MODIFIED_DATE" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="DELETED_BY" type="VARCHAR(50)"/>
+            <column name="DELETED_DATE" type="TIMESTAMP WITH TIME ZONE"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-email-attachment-table" author="yourname">
+        <createTable tableName="EMAIL_ATTACHMENT">
+            <column name="ID" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="FILE_NAME" type="VARCHAR(255)"/>
+            <column name="MIME_TYPE" type="VARCHAR(100)"/>
+            <column name="FILE_SIZE" type="BIGINT"/>
+            <column name="CONTENT" type="BYTEA"/>
+            <column name="EMAIL_ID" type="UUID"/>
+
+            <column name="VERSION" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CREATED_BY" type="VARCHAR(50)"/>
+            <column name="CREATED_DATE" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="LAST_MODIFIED_BY" type="VARCHAR(50)"/>
+            <column name="LAST_MODIFIED_DATE" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="DELETED_BY" type="VARCHAR(50)"/>
+            <column name="DELETED_DATE" type="TIMESTAMP WITH TIME ZONE"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="EMAIL_ATTACHMENT"
+                baseColumnNames="EMAIL_ID"
+                constraintName="FK_EMAIL_ATTACHMENT_EMAIL"
+                referencedTableName="RECEIVED_EMAIL"
+                referencedColumnNames="ID"
+                deferrable="false"
+                initiallyDeferred="false"/>
+    </changeSet>
+
+    <changeSet id="create-indexes" author="yourname">
+        <createIndex tableName="RECEIVED_EMAIL" indexName="IDX_RECEIVED_EMAIL_UID">
+            <column name="UID"/>
+        </createIndex>
+
+        <createIndex tableName="EMAIL_ATTACHMENT" indexName="IDX_EMAIL_ATTACHMENT_EMAIL_ID">
+            <column name="EMAIL_ID"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

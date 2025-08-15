@@ -1,0 +1,874 @@
+import url(https://fonts.googleapis.com/css?family=Mulish:wght@400;500;600&display=swap);
+
+
+:root
+--bg-color: #f9f9fb; /* Светлый фон, почти белый */
+--text-color: #333; /* Темно-серый для текста */
+--primary-color: #6366f1; /* Фиолетовый, основной цвет */
+--secondary-color: #e0e7ff; /* Светло-фиолетовый, вторичный цвет */
+--task-color: #ffffff; /* Белый для карточек задач */
+--cancel-color: #ef4444; /* Красный для отмены */
+--confirm-color: #22c55e; /* Зеленый для подтверждения */
+--confirm-hoover-color: #16a34a; /* Темно-зеленый при наведении */
+--task-size: 200px; /* Пример размера карточки задачи */
+}
+
+
+/* Пример использования цветов */
+body {
+background-color: var(--bg-color);
+color: var(--text-color);
+font-family: 'Mulish', sans-serif;
+padding:0;
+ margin:0;
+ box-sizing:border-box;
+}
+
+
+.task-card {
+background-color: var(--task-color);
+border-radius: 8px;
+padding: 16px;
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+.primary-button {
+background-color: var(--primary-color);
+color: white;
+border: none;
+padding: 10px 20px;
+border-radius: 5px;
+cursor: pointer;
+}
+
+
+.cancel-button {
+background-color: var(--cancel-color);
+color: white;
+border: none;
+padding: 10px 20px;
+border-radius: 5px;
+cursor: pointer;
+}
+
+
+.confirm-button {
+background-color: var(--confirm-color);
+color: white;
+border: none;
+padding: 10px 20px;
+border-radius: 5px;
+cursor: pointer;
+}
+
+
+.confirm-button:hover {
+background-color: var(--confirm-hoover-color);
+}
+
+
+.h1{
+margin: 2rem 0;
+}
+
+button {
+	 background-color: #f44336; /* Красный фон */
+	 border: none;
+	 color: white;
+	 padding: 15px 32px;
+	 text-align: center;
+ 	text-decoration: none;
+ 	display: inline-block;
+ 	font-size: 16px;
+ 	margin: 4px 2px;
+ 	cursor: pointer;
+ 	border-radius: 5px;
+ 	position: relative;
+ 	overflow: hidden;
+}
+
+
+button::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: -100%;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+	transition: 0.6s;
+}
+
+
+button:hover::before {
+	left: 100%;
+}
+
+.update-button {
+    background-color:  #3a07c5; /* Синий цвет для кнопки обновления */
+    color: white;
+    border: none;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+    position: relative;
+    overflow: hidden;
+}
+
+.update-button:hover {
+    background-color: #3e16ac; /* Темно-синий цвет при наведении */
+}
+
+.update-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: 0.6s;
+}
+
+.update-button:hover::before {
+    left: 100%;
+}
+
+.delete-button {
+    background-color: #f44336; /* Красный цвет */
+    color: white;
+    border: none;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+    position: relative;
+    overflow: hidden;
+}
+
+.delete-button:hover {
+    background-color: #d32f2f; /* Темно-красный при наведении */
+}
+
+.delete-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: 0.6s;
+}
+
+.delete-button:hover::before {
+    left: 100%;
+}
+
+.container {
+ 	max-width: 1200px;
+ 	margin: 0 auto;
+}
+
+
+h1 {
+	text-align: center;
+	color: #333;
+ 	margin-bottom: 30px;
+}
+
+
+.columns {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+	gap: 20px;
+}
+
+
+@media(min-width: 768px){
+.columns{
+	 flex-direction: row;
+ 	}
+}
+
+
+.column {
+background-color: #fff;
+ 	border-radius: 8px;
+ 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+ 	padding: 20px;
+ 	flex: 1;
+ 	min-width: 250px;
+}
+
+
+.column-title {
+ 	display: flex;
+	justify-content: space-between;
+	align-items: center;
+  margin-bottom: 20px;
+
+
+}
+
+
+.column-title h3 {
+	margin: 0;
+ 	font-size: 22px;
+ 	font-weight: bold;
+ 	color: #080708;
+	/*text-transform: uppercase;/*   /* Трансформация текста в верхний регистр */
+}
+
+.column-title h3::after{
+	content: attr(data-tasks);
+  background: lightblue;
+  margin-left: 0.25rem;
+  border-radius: 0.25rem;
+  padding: 0 0.25rem;
+}
+
+#planned-title {
+    color: #f44336;
+}
+
+#in-progress-title {
+    color: #8d3a82;
+}
+
+#review-title {
+    color: #3a07c5;
+}
+
+#done-title {
+    color: #4CAF50;
+}
+
+.column-title button {
+  background-color: #4CAF50; /* Зеленый цвет кнопки */
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+
+.column-title button:hover {
+  background-color: #3e8e41; /* Темнее при наведении */
+}
+
+
+.tasks {
+  min-height: 100px; /* Минимальная высота для удобства drag-and-drop */
+  padding: 10px;
+}
+
+
+.tasks div { /* Стиль карточки задачи (если они будут добавлены) */
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  cursor: grab; /* Изменение курсора для drag-and-drop */
+}
+
+
+/* Стили для иконок bi (Bootstrap Icons) */
+.bi-plus::before {
+  font-size: 1.2em; /* Увеличиваем размер иконки */
+}
+
+
+.task {
+  cursor: move;
+  transition: 0.3s;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+.task.dragging {
+  cursor: default;
+  background: var(--secondary-color);
+  opacity: 0.7;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+
+.task.dragging * {
+  visibility: hidden;
+}
+
+
+.task:not(.dragging):hover {
+	background: var(--task-color);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+
+.task menu {
+  margin-top: 0.875rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+
+.task-button {
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 1.25rem;
+  background-color: #f0f0f0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+
+.task-button:hover {
+  background-color: #e0e0e0;
+}
+
+
+.task-input {
+  outline: none;
+  overflow-wrap: anywhere;
+  padding-left: 2.5rem;
+  border: none;
+  width: 100%;
+}
+
+
+.task-input::before {
+  content: "\f26c"; /* Пример: иконка "check" */
+  font-family: "bootstrap-icons";
+  position: absolute;
+  left: 0.875rem;
+  top: 50%;
+  transform: translateY(-50%);
+ opacity: 0.5;
+}
+
+
+.task-input:empty::after {
+  content: attr(data-placeholder);
+  opacity: 0.5;
+}
+
+:root {
+  --confirm-color: #22c55e;
+  --confirm-hover-color: #16a34a;
+ /* Другие переменные */
+}
+
+.confirm-modal {
+  opacity: 1;
+  transform: translate(-50%, -50%) translateY(50%);
+  left: 50%;
+  top: 50%;
+  border: none;
+  border-radius: .25rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-out;
+  position: fixed;
+  z-index: 1000;
+  background-color: white;
+}
+
+.confirm-modal[open] {
+  opacity: 1;
+  transform: translate(-50%, -50%) translateY(0);
+}
+
+.confirm-modal[open]::backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+  transition: background-color 0.3s ease-out;
+}
+
+
+.confirm-modal::backdrop {
+ background-color: rgba(0, 0, 0, 0);
+ transition: background-color 0.3s ease-out;
+}
+
+
+@starting-style {
+  .confirm-modal[open] {
+      opacity: 0;
+      transform: translate(-50%, -50%) translateY(50px);
+  }
+
+
+  .confirm-modal[open]::backdrop {
+      background-color: rgba(0, 0, 0, 0);
+  }
+}
+
+
+.confirm-modal form {
+ padding: 2rem;
+}
+
+
+.confirm-modal form > *:not(:last-child) {
+ margin-bottom: 1rem;
+}
+
+
+.confirm-modal h3 {
+ font-size: 1.5rem;
+}
+
+
+.confirm-modal div.preview {
+  font-size: 0.875rem; padding-left: 0.5rem;
+  border-left: 2px solid var(--secondary-color);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  opacity: 0.75;
+}
+
+
+.confirm-modal menu {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+
+.confirm-modal button {
+  opacity: 1;
+  font-size: 1rem;
+  padding: .5rem 1rem;
+  border-radius: .25rem;
+  border: 1px solid transparent;
+  box-shadow: 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+
+.confirm-modal button#confirm {
+  border-color: var(--confirm-color);
+  background: var(--confirm-color);
+  color: white;
+}
+
+
+.confirm-modal button#confirm:hover {
+	 border-color: var(--confirm-hover-color);
+	 background: var(--confirm-hover-color);
+  color: white;
+}
+
+
+.task div {
+    white-space: pre-line; /* Сохраняет переносы строк */
+    word-wrap: break-word; /* Переносит длинные слова на новую строку */
+}
+
+/* 15.03 */
+.error-message {
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.task-input-container {
+    display: flex;
+    flex-direction: column; /* Элементы располагаются вертикально */
+    gap: 8px; /* Отступ между полем ввода и кнопками */
+}
+
+.task-input {
+    width: 100%; /* Поле ввода занимает всю доступную ширину */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.buttons-container {
+    display: flex;
+    gap: 8px; /* Отступ между кнопками */
+    justify-content: flex-end; /* Кнопки выравниваются по правому краю */
+}
+
+.cancel-button, .save-button {
+    font-size: 16px; /* Размер иконки */
+    width: 30px; /* Фиксированная ширина кнопки */
+    height: 30px; /* Фиксированная высота кнопки */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%; /* Круглая форма кнопки */
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.cancel-button {
+    background-color: #f44336;
+    color: white;
+}
+
+.cancel-button:hover {
+    background-color: #d32f2f;
+}
+
+.save-button {
+    background-color: #4caf50;
+    color: white;
+}
+
+.save-button:hover {
+    background-color: #388e3c;
+}
+
+/* custom alert */
+.custom-alert {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный фон */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Убедитесь, что окно поверх других элементов */
+}
+
+.custom-alert-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+/* приветствие пользователя*/
+#usernameDisplay {
+    text-align: center; /* Выравнивание текста по центру */
+    color: #4CAF50; /* Красивый зеленый цвет (можете заменить на любой другой) */
+    font-size: 24px; /* Размер шрифта */
+    margin-bottom: 10px; /* Отступ снизу */
+}
+
+.container {
+    text-align: center; /* Выравнивание всего контейнера по центру */
+}
+
+/* отображение задач на kanban */
+.column .tasks {
+    min-height: 100px;
+    background: #f0f0f0;
+    padding: 8px;
+    border-radius: 4px;
+}
+
+.task {
+    background: white;
+    padding: 8px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+/*
+#planned-title::before { content: "Запланировано"; }
+#in-progress-title::before { content: "В процессе"; }
+#review-title::before { content: "На проверке"; }
+#done-title::before { content: "Завершено"; }
+*/
+
+#planned-title::before,
+#in-progress-title::before,
+#review-title::before,
+#done-title::before {
+  content: none; /* Отключаем псевдоэлементы */
+}
+
+.column h3 {
+    font-size: 0; /* Скрываем оригинальный текст */
+}
+
+.column h3::before {
+    font-size: 1rem; /* Восстанавливаем размер шрифта */
+}
+
+/* окно предпросмотра*/
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.task-preview-item {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+}
+
+.task-preview-item input {
+  margin-right: 10px;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#taskSearch {
+    width: 100%;
+    padding: 8px;
+    margin: 10px 0;
+    box-sizing: border-box;
+}
+
+.task-search-input {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.task-checkbox {
+    margin-right: 10px;
+}
+
+.task-label {
+    flex-grow: 1;
+}
+
+.task-title {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 16px;
+}
+
+.task-meta {
+    font-size: 14px;
+    color: #666;
+    display: block;
+}
+
+.no-tasks-message {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+}
+
+.scroll-btn {
+  position: absolute;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #2c3e50;
+  color: white;
+  border: none;
+  cursor: pointer;
+  z-index: 1001;
+  opacity: 0.7;
+  transition: opacity 0.3s;
+}
+
+.scroll-btn:hover {
+  opacity: 1;
+}
+
+#scrollUpBtn {
+  bottom: 100px;
+}
+
+#scrollDownBtn {
+  bottom: 50px;
+}
+
+#taskPreviewList {
+  padding-right: 20px;
+}
+
+.btn-save {
+    background-color: #4CAF50;
+    color: white;
+    margin-left: 10px;
+}
+
+.btn-save:hover {
+    background-color: #45a049;
+}
+
+/* Стили для модального окна предпросмотра задач */
+#taskPreviewModal {
+    display: none;
+    position: fixed;
+    top: 20px; /* Опускаем окно ниже от верхнего края */
+    left: 50%;
+    transform: translateX(-50%);
+    max-height: 90vh; /* Ограничиваем высоту */
+    overflow-y: auto; /* Добавляем прокрутку при необходимости */
+    width: 90%;
+    max-width: 800px;
+    z-index: 1000;
+    background: white;
+    padding: 20px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    border-radius: 8px;
+}
+
+/* Стили для содержимого модального окна */
+.modal-content {
+    position: relative;
+    padding-bottom: 60px; /* Место для кнопок */
+}
+
+/* Стили для списка задач */
+#taskPreviewList {
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+/* Стили для кнопок внизу модального окна */
+#confirmTaskSelection {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Стили для кнопок прокрутки */
+.scroll-btn {
+    position: fixed;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+#scrollUpBtn {
+    bottom: 70px;
+}
+
+#scrollDownBtn {
+    bottom: 120px;
+}
+
+#taskPreviewModal {
+    /* ... другие стили ... */
+    background: white;
+    border: 1px solid #ddd;
+}
+
+/* Затемнение фона при открытом модальном окне */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+}
+
+/*стили для автосохранения*/
+.autosave-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 4px;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.autosave-notification.show {
+    opacity: 1;
+}
+
+.unsaved-changes-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.unsaved-changes-dialog .dialog-content {
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    max-width: 400px;
+}
+
+.unsaved-changes-dialog .dialog-buttons {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+    gap: 10px;
+}
+
+.unsaved-changes-dialog .dialog-btn {
+    padding: 8px 16px;
+    cursor: pointer;
+}

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+
+    <changeSet id="1" author="LawCrmSystem3">
+        <addColumn tableName="DOCUMENT">
+            <column name="TASK_ID" type="UUID">
+                <constraints nullable="true"/> </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="2" author="LawCrmSystem3">
+        <addForeignKeyConstraint baseTableName="DOCUMENT"
+                                 baseColumnNames="TASK_ID"
+                                 constraintName="FK_DOCUMENT_ON_TASK"
+                                 referencedTableName="TASK_"
+                                 referencedColumnNames="ID"/>
+    </changeSet>
+
+    <changeSet id="3" author="LawCrmSystem3">
+        <createIndex indexName="IDX_DOCUMENT_TASK"
+                     tableName="DOCUMENT"
+                     unique="false">
+            <column name="TASK_ID"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

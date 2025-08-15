@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+
+    <!-- Удаление связи Deal из CaseStage с проверкой существования ограничения -->
+    <changeSet id="remove-deal-from-case-stage" author="LawCrmSystem3">
+        <comment>Удаление столбца DEAL_ID из таблицы CASE_STAGE и связанного внешнего ключа</comment>
+
+        <dropForeignKeyConstraint baseTableName="CASE_STAGE"
+                                  constraintName="fk_casestage_on_deal"/>
+
+        <dropColumn tableName="CASE_STAGE" columnName="DEAL_ID"/>
+    </changeSet>
+
+    <!-- Создание таблицы Process -->
+    <changeSet id="create-process-table" author="LawCrmSystem3">
+        <comment>Создание таблицы PROCESS для сущности Process</comment>
+
+        <createTable tableName="PROCESS">
+            <column name="ID" type="UUID">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="VERSION" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PROCESS_NAME" type="VARCHAR(255)"/>
+            <column name="PROCESS_DESCRIPTION" type="VARCHAR(1024)"/>
+            <column name="STATUS" type="VARCHAR(50)"/>
+            <column name="CREATED_BY" type="VARCHAR(50)"/>
+            <column name="CREATED_DATE" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="LAST_MODIFIED_BY" type="VARCHAR(50)"/>
+            <column name="LAST_MODIFIED_DATE" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="DELETED_BY" type="VARCHAR(50)"/>
+            <column name="DELETED_DATE" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="DEAL_ID" type="UUID"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Добавление связи Process -> Deal -->
+    <changeSet id="add-deal-fk-to-process" author="LawCrmSystem3">
+        <comment>Добавление внешнего ключа к DEAL в таблице PROCESS</comment>
+
+        <addForeignKeyConstraint baseTableName="PROCESS"
+                                 baseColumnNames="DEAL_ID"
+                                 referencedTableName="DEAL"
+                                 referencedColumnNames="ID"
+                                 constraintName="fk_process_on_deal"
+                                 deferrable="false"
+                                 initiallyDeferred="false"/>
+    </changeSet>
+
+    <!-- Добавление связи CaseStage -> Process -->
+    <changeSet id="add-process-fk-to-case-stage" author="LawCrmSystem3">
+        <comment>Добавление столбца PROCESS_ID и внешнего ключа в CASE_STAGE</comment>
+
+        <addColumn tableName="CASE_STAGE">
+            <column name="PROCESS_ID" type="UUID"/>
+        </addColumn>
+
+        <addForeignKeyConstraint baseTableName="CASE_STAGE"
+                                 baseColumnNames="PROCESS_ID"
+                                 referencedTableName="PROCESS"
+                                 referencedColumnNames="ID"
+                                 constraintName="fk_case_stage_on_process"
+                                 deferrable="false"
+                                 initiallyDeferred="false"/>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://clientDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="clientDc"
+                  class="ru.ak.lawcrmsystem3.entity.Client">
+            <fetchPlan extends="_base">
+                <property name="interactionsHistory" fetchPlan="_base"/>
+                <property name="deals" fetchPlan="_base"/>
+            </fetchPlan>
+            <loader id="clientDl"/>
+            <collection id="dealsDc" property="deals"/>
+        </instance>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <actions>
+        <action id="saveAction" type="detail_saveClose"/>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <layout>
+        <formLayout id="form" dataContainer="clientDc">
+            <responsiveSteps>
+                <responsiveStep minWidth="0" columns="1"/>
+                <responsiveStep minWidth="40em" columns="2"/>
+            </responsiveSteps>
+            <textField id="nameField" property="name"/>
+            <textField id="addressField" property="address"/>
+            <textField id="emailField" property="email"/>
+            <textField id="phoneNumberField" property="phoneNumber"/>
+            <textField id="otherInfoField" property="otherInfo"/>
+            <select id="clientCategoryField" property="clientCategory"/>
+            <select id="clientStatusField" property="clientStatus"/>
+        </formLayout>
+        <dataGrid id="dealsDataGrid" dataContainer="dealsDc" width="100%" minHeight="20em">
+            <columns>
+                <column property="title"/>
+                <column property="dealNumber"/>
+                <column property="startedAt"/>
+                <column property="finishedAt"/>
+                <column property="description"/>
+                <column property="dealStatus"/>
+            </columns>
+        </dataGrid>
+        <hbox id="detailActions">
+            <button id="saveAndCloseButton" action="saveAction"/>
+            <button id="closeButton" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

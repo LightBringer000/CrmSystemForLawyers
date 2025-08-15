@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+    <changeSet id="create-deal-client-join-table" author="your-name">
+        <comment>Create join table for Deal-Client Many-to-Many relationship</comment>
+        <createTable tableName="deal_client">
+            <column name="deal_id" type="UUID"> <constraints nullable="false"/>
+            </column>
+            <column name="client_id" type="UUID"> <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="deal_client" columnNames="deal_id, client_id"
+                       constraintName="pk_deal_client"/>
+
+        <addForeignKeyConstraint baseTableName="deal_client"
+                                 baseColumnNames="deal_id"
+                                 referencedTableName="deal"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_deal_client_deal"/>
+
+        <addForeignKeyConstraint baseTableName="deal_client"
+                                 baseColumnNames="client_id"
+                                 referencedTableName="client"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_deal_client_client"/>
+    </changeSet>
+
+    <changeSet id="migrate-old-deal-client-data" author="your-name" runOnChange="true">
+        <comment>Migrate existing deal_id from client table to deal_client join table</comment>
+        <sql>
+            INSERT INTO deal_client (deal_id, client_id)
+            SELECT c.deal_id, c.id
+            FROM client c
+            WHERE c.deal_id IS NOT NULL
+            ON CONFLICT (deal_id, client_id) DO NOTHING; -- Чтобы избежать дубликатов при повторном запуске
+        </sql>
+    </changeSet>
+
+    <changeSet id="drop-deal-id-from-client-table" author="your-name">
+        <comment>Drop old deal_id column from client table after data migration</comment>
+        <dropColumn tableName="client" columnName="deal_id"/>
+    </changeSet>
+</databaseChangeLog>

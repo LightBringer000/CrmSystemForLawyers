@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<menu-config xmlns="http://jmix.io/schema/flowui/menu">
+
+    <menu id="application" title="msg://ru.ak.lawcrmsystem3/menu.application.title" opened="true">
+        <item view="User.list" title="msg://ru.ak.lawcrmsystem3.view.user/userListView.title"/>
+        <item view="DealParticipant.list"
+              title="msg://ru.ak.lawcrmsystem3.view.dealparticipant/dealParticipantListView.title"/>
+        <item view="Document.list" title="msg://ru.ak.lawcrmsystem3.view.document/documentListView.title"/>
+        <item view="Task_.list" title="msg://ru.ak.lawcrmsystem3.view.task/taskListView.title"/>
+        <item view="Event.list" title="msg://ru.ak.lawcrmsystem3.view.event/eventListView.title"/>
+        <item view="MyCalendar" title="msg://ru.ak.lawcrmsystem3.view.mycalendar/myCalendar.title"/>
+        <item view="KanbanView" title="msg://ru.ak.lawcrmsystem3.view.kanban/kanbanView.title"/>
+        <item view="Servicerenderedview"
+              title="msg://ru.ak.lawcrmsystem3.view.servicerendered/servicerenderedview.title"/>
+        <item view="ServiceRendered.list"
+              title="msg://ru.ak.lawcrmsystem3.view.servicerendered/serviceRenderedListView.title"/>
+        <item view="EmailEntityBrowse.list"
+              title="msg://ru.ak.lawcrmsystem3.view.emailentitybrowse/emailEntityBrowseListView.title"/>
+        <item view="Client.list" title="msg://ru.ak.lawcrmsystem3.view.client/clientListView.title"/>
+        <item view="EmailListView" title="msg://ru.ak.lawcrmsystem3.view.emaillist/emailListView.title"/>
+        <item view="Deal.list" title="msg://ru.ak.lawcrmsystem3.view.deal/dealListView.title"/>
+        <item view="LegalDocumentData.list"
+              title="msg://ru.ak.lawcrmsystem3.view.legaldocumentdata/legalDocumentDataListView.title"/>
+        <item view="InteractionsHistory.list"
+              title="msg://ru.ak.lawcrmsystem3.view.interactionshistory/interactionsHistoryListView.title"/>
+        <item view="CaseStageView" title="msg://ru.ak.lawcrmsystem3.view.casestage/caseStageView.title"/>
+        <item view="ProcessView" title="msg://ru.ak.lawcrmsystem3.view.process/processView.title"/>
+        <item view="TranscriptionRecord.list"
+              title="msg://ru.ak.lawcrmsystem3.view.transcriptionrecord/transcriptionRecordListView.title"/>
+    </menu>
+
+</menu-config>

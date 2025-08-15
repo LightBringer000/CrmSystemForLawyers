@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
+      title="msg://emailEntityBrowseListView.title"
+      focusComponent="emailEntityBrowsesDataGrid">
+    <data>
+        <collection id="emailEntityBrowsesDc"
+                    class="ru.ak.lawcrmsystem3.entity.EmailEntityBrowse">
+            <fetchPlan extends="_base">
+                <property name="servicesRendered" fetchPlan="_base"/>
+            </fetchPlan>
+            <loader id="emailEntityBrowsesDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from EmailEntityBrowse e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+        <urlQueryParameters>
+            <genericFilter component="genericFilter"/>
+            <pagination component="pagination"/>
+        </urlQueryParameters>
+    </facets>
+    <actions>
+        <action id="selectAction" type="lookup_select"/>
+        <action id="discardAction" type="lookup_discard"/>
+    </actions>
+    <layout>
+        <genericFilter id="genericFilter"
+                       dataLoader="emailEntityBrowsesDl">
+            <properties include=".*"/>
+        </genericFilter>
+        <hbox id="buttonsPanel" classNames="buttons-panel">
+            <button id="readButton" action="emailEntityBrowsesDataGrid.readAction"/>
+            <simplePagination id="pagination" dataLoader="emailEntityBrowsesDl"/>
+        </hbox>
+        <dataGrid id="emailEntityBrowsesDataGrid"
+                  width="100%"
+                  minHeight="20em"
+                  dataContainer="emailEntityBrowsesDc"
+                  columnReorderingAllowed="true">
+            <actions>
+                <action id="readAction" type="list_read"/>
+            </actions>
+            <columns resizable="true">
+                <column property="capture"/>
+                <column property="content"/>
+                <column property="attachedFile"/>
+                <column property="clientEmail"/>
+            </columns>
+        </dataGrid>
+        <hbox id="lookupActions" visible="false">
+            <button id="selectButton" action="selectAction"/>
+            <button id="discardButton" action="discardAction"/>
+        </hbox>
+    </layout>
+</view>

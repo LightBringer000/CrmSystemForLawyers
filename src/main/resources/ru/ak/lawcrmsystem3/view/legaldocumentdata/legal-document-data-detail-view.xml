@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="Редактирование юридического документа"
+      focusComponent="mainLayout">
+    <data>
+        <instance id="legalDocumentDataDc"
+                  class="ru.ak.lawcrmsystem3.entity.LegalDocumentData">
+            <fetchPlan extends="_base"/>
+            <loader id="legalDocumentDataDl"/>
+        </instance>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <actions>
+        <action id="saveAction" type="detail_saveClose"/>
+        <action id="closeAction" type="detail_close"/>
+        <action id="generateDocumentAction" text="Сгенерировать документ"/>
+    </actions>
+    <layout>
+        <vbox id="mainLayout" width="100%" height="100%">
+            <!-- Основная область с прокруткой -->
+            <div classNames="scrollable-content" width="100%">
+                <formLayout id="form" dataContainer="legalDocumentDataDc" width="100%">
+                    <responsiveSteps>
+                        <responsiveStep minWidth="0" columns="1"/>
+                    </responsiveSteps>
+
+                    <!-- Блок 1: Адресат -->
+                    <textArea id="toField" property="to"
+                              label="Кому (адресат)"
+                              helperText="Укажите адресата документа, его адрес, а, при необходимости, и иные реквизиты (ИНН, СНИЛС, ОГРН и т.п.)"
+                              width="100%"
+                              height="200px"/>
+
+                    <!-- Блок 2: Заявители -->
+                    <textArea id="fromField" property="from"
+                              label="От кого (заявители)"
+                              helperText="Укажите заявителей, каждого с новой строки"
+                              width="100%"
+                              height="200px"/>
+
+                    <!-- Блок 3: Участники -->
+                    <textArea id="participantsField" property="participants"
+                              label="Участники процесса"
+                              helperText="ФИО и роль каждого участника с новой строки"
+                              width="100%"
+                              height="350px"/>
+
+                    <!-- Блок 4: Дополнительная информация -->
+                    <textArea id="otherInfoField" property="otherInfo"
+                              label="Дополнительная информация"
+                              helperText="Размер госпошлины и другие детали"
+                              width="100%"
+                              height="200px"/>
+
+                    <!-- Блок 5: Название документа -->
+                    <textArea id="titleField" property="title"
+                               label="Название документа"
+                               width="100%"
+                               height="200px"/>
+
+                    <!-- Блок 6: Содержание (высота как страница А4) -->
+                    <textArea id="contentField" property="content"
+                              label="Содержание документа"
+                              width="100%"
+                              height="1500px"
+                              classNames="a4-content-field"/>
+
+                    <!-- Блок 7: Просительная часть -->
+                    <textArea id="requestsField" property="requests"
+                              label="Просительная часть"
+                              helperText="Каждый пункт требования с новой строки"
+                              width="100%"
+                              height="350px"/>
+
+                    <!-- Блок 8: Приложения -->
+                    <textArea id="attachmentsField" property="attachments"
+                              label="Приложения"
+                              helperText="Перечислите приложения, каждое с новой строки"
+                              width="100%"
+                              height="350px"/>
+
+                    <!-- Блок 9: Подписанты -->
+                    <textArea id="signatoriesField" property="signatories"
+                              label="Подписанты"
+                              helperText="Перечислите Ф.И.О. и должность лиц, подписавших документ. Каждого с новой строки"
+                              width="100%"
+                              height="200px"/>
+                </formLayout>
+            </div>
+
+            <!-- Кнопки действий (фиксированные внизу) -->
+            <div classNames="footer-actions" width="100%">
+                <hbox width="100%" justifyContent="END">
+                    <button id="generateDocumentBtn" action="generateDocumentAction"/>
+                    <button id="saveAndCloseButton" action="saveAction" classNames="primary"/>
+                    <button id="closeButton" action="closeAction"/>
+                </hbox>
+            </div>
+        </vbox>
+    </layout>
+</view>
