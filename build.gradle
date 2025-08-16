@@ -78,6 +78,9 @@ dependencies {
     implementation("org.bytedeco:javacv:1.5.12")
     implementation("org.bytedeco:ffmpeg-platform:7.1.1-1.5.12")
 
+    implementation 'io.jmix.flowui:jmix-flowui-starter'
+
+
 }
 
 configurations.implementation {

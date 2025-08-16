@@ -40,6 +40,11 @@
                     text="Скачать в PDF"
                     themeNames="error primary"
                     styleName="margin-bottom: 40px;"/>
+
+            <button id="attachToDealButton"
+                    text="Прикрепить к делу"
+                    themeNames="success primary"
+                    styleName="margin-bottom: 40px; margin-left: 10px;"/>
         </hbox>
 
     </layout>
