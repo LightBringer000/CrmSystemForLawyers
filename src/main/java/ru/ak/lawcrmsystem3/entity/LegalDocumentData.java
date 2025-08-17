@@ -4,11 +4,13 @@ import io.jmix.core.annotation.DeletedBy;
 import io.jmix.core.annotation.DeletedDate;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.metamodel.annotation.JmixEntity;
+import io.jmix.core.metamodel.annotation.JmixProperty;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import ru.ak.lawcrmsystem3.dto.ImageData;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -49,6 +51,11 @@ public class LegalDocumentData {
 
     @Column(name = "SIGNATORIES", length = 500)
     private String signatories;
+
+    //new field
+    // Аннотация @Transient говорит JPA (Hibernate) игнорировать это поле
+    @Transient
+    private List<ImageData> images;
 
     @Column(name = "VERSION", nullable = false)
     @Version
@@ -213,5 +220,13 @@ public class LegalDocumentData {
 
     public void setSignatories(String signatories) {
         this.signatories = signatories;
+    }
+
+    public List<ImageData> getImages() {
+        return images;
+    }
+
+    public void setImages(List<ImageData> images) {
+        this.images = images;
     }
 }

@@ -233,6 +233,58 @@ public class LegalDocumentDataDetailView extends StandardDetailView<LegalDocumen
                 """);
     }
 
+//    @Subscribe("generateDocumentBtn")
+//    public void onGenerateDocumentBtnClick(ClickEvent<Button> event) {
+//        try {
+//            LegalDocumentData documentData = getEditedEntity();
+//
+//            // Извлекаем HTML-содержимое из RichTextEditor'ов
+//            String toHtml = toField.getValue();
+//            String fromHtml = fromField.getValue();
+//            String participantsHtml = participantsField.getValue();
+//            String otherInfoHtml = otherInfoField.getValue();
+//            String titleHtml = titleField.getValue();
+//            String contentHtml = contentField.getValue();
+//            String requestsHtml = requestsField.getValue();
+//            String attachmentsHtml = attachmentsField.getValue();
+//            String signatoriesHtml = signatoriesField.getValue();
+//
+//            // Удаляем HTML-теги перед сохранением в entity
+//            documentData.setTo(stripHtmlTags(toHtml));
+//            documentData.setFrom(stripHtmlTags(fromHtml));
+//            documentData.setParticipants(stripHtmlTags(participantsHtml));
+//            documentData.setOtherInfo(stripHtmlTags(otherInfoHtml));
+//            documentData.setTitle(stripHtmlTags(titleHtml));
+//            documentData.setContent(stripHtmlTags(contentHtml));
+//            documentData.setRequests(stripHtmlTags(requestsHtml));
+//            documentData.setAttachments(stripHtmlTags(attachmentsHtml));
+//            documentData.setSignatories(stripHtmlTags(signatoriesHtml));
+//
+//
+//            // Генерируем временный файл
+//            String fileName = generateFileName(documentData);
+//            Path tempFile = Files.createTempFile("law_doc_", ".docx");
+//
+//            // Генерируем документ
+//            documentGeneratorService.generateLegalDocument(documentData, tempFile.toString());
+//
+//            // Предлагаем скачать
+//            downloader.download(
+//                    Files.readAllBytes(tempFile),
+//                    fileName,
+//                    DownloadFormat.DOCX
+//            );
+//
+//            notifications.create("Документ успешно сгенерирован")
+//                    .show();
+//
+//        } catch (IOException e) {
+//            notifications.create("Ошибка при генерации документа: " + e.getMessage())
+//                    .show();
+//            e.printStackTrace();
+//        }
+//    }
+
     @Subscribe("generateDocumentBtn")
     public void onGenerateDocumentBtnClick(ClickEvent<Button> event) {
         try {
@@ -249,13 +301,17 @@ public class LegalDocumentDataDetailView extends StandardDetailView<LegalDocumen
             String attachmentsHtml = attachmentsField.getValue();
             String signatoriesHtml = signatoriesField.getValue();
 
-            // Удаляем HTML-теги перед сохранением в entity
+            // ⚠️ Ключевое изменение: НЕ удаляем HTML-теги для поля content.
+            // Передаем полный HTML в сервис.
+            documentData.setContent(contentHtml);
+
+            // Для остальных полей, где изображения не ожидаются,
+            // оставляем удаление тегов.
             documentData.setTo(stripHtmlTags(toHtml));
             documentData.setFrom(stripHtmlTags(fromHtml));
             documentData.setParticipants(stripHtmlTags(participantsHtml));
             documentData.setOtherInfo(stripHtmlTags(otherInfoHtml));
             documentData.setTitle(stripHtmlTags(titleHtml));
-            documentData.setContent(stripHtmlTags(contentHtml));
             documentData.setRequests(stripHtmlTags(requestsHtml));
             documentData.setAttachments(stripHtmlTags(attachmentsHtml));
             documentData.setSignatories(stripHtmlTags(signatoriesHtml));
