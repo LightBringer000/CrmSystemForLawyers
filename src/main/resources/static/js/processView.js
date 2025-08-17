@@ -889,7 +889,8 @@ function renderStages() {
         stagesList.appendChild(stageElement);
     });
 
-    initSortableStages();
+    // Инициализируем сортировку после небольшой задержки
+    setTimeout(() => initSortableStages(), 50);
 }
 
 function createStageElement(stage) {
@@ -991,19 +992,42 @@ function initSortableStages() {
     const stagesList = document.getElementById('stages-list');
     if (!stagesList) return;
 
+    // Очищаем старые обработчики
+    stagesList.removeEventListener('dragover', handleDragOver);
+    stagesList.querySelectorAll('.stage-item').forEach(item => {
+        item.removeEventListener('dragstart', handleDragStart);
+        item.removeEventListener('dragend', handleDragEnd);
+    });
+
+    // Добавляем новые обработчики
     stagesList.addEventListener('dragover', handleDragOver);
+    stagesList.querySelectorAll('.stage-item').forEach(item => {
+        item.addEventListener('dragstart', handleDragStart);
+        item.addEventListener('dragend', handleDragEnd);
+        item.draggable = true;
+    });
 }
 
 function handleDragStart(e) {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', e.target.dataset.stageId);
     e.target.classList.add('dragging');
+
+    // Улучшение: добавляем небольшой delay для более плавного перетаскивания
+    setTimeout(() => {
+        e.target.style.opacity = '0.4';
+    }, 0);
 }
 
 function handleDragEnd(e) {
     e.target.classList.remove('dragging');
+    e.target.style.opacity = '1';
 }
 
 function handleDragOver(e) {
     e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+
     const draggingElement = document.querySelector('.dragging');
     if (!draggingElement) return;
 
@@ -1037,22 +1061,23 @@ async function saveStagesOrder() {
 
         const stageElements = stagesList.querySelectorAll('.stage-item');
         const updates = [];
+        const batchSize = 5; // Размер батча для группировки запросов
+        let currentBatch = [];
 
         for (let i = 0; i < stageElements.length; i++) {
             const stageId = stageElements[i].dataset.stageId;
             const stageToUpdate = stages.find(s => s.id === stageId);
 
             if (stageToUpdate) {
-                // Создаем полный объект для обновления
                 const updatedStage = {
                     ...stageToUpdate,
                     orderIndex: i,
                     _entityName: "CaseStage"
                 };
 
-                updates.push(
+                currentBatch.push(
                     fetch(`${STAGES_API}/${stageId}`, {
-                        method: 'PUT', // Используем PUT вместо PATCH
+                        method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
                             'Accept': 'application/json'
@@ -1060,12 +1085,25 @@ async function saveStagesOrder() {
                         body: JSON.stringify(updatedStage)
                     })
                 );
+
+                // Отправляем батч при достижении размера
+                if (currentBatch.length >= batchSize) {
+                    updates.push(Promise.all(currentBatch));
+                    currentBatch = [];
+                }
             }
+        }
+
+        // Отправляем оставшиеся запросы
+        if (currentBatch.length > 0) {
+            updates.push(Promise.all(currentBatch));
         }
 
         await Promise.all(updates);
         showNotification('Порядок стадий успешно сохранен');
-        await loadStages(currentProcessId); // Перезагружаем стадии
+
+        // Опционально: перезагружаем стадии для синхронизации
+        await loadStages(currentProcessId);
     } catch (error) {
         console.error('Error saving order:', error);
         showError('Ошибка сохранения порядка: ' + error.message);

@@ -1,10 +1,16 @@
 package ru.ak.lawcrmsystem3.view.transcriptionrecord;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.page.Page;
+import com.vaadin.flow.server.StreamResource;
+import io.jmix.core.FileTransferService;
 import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.action.DialogAction;
+import io.jmix.flowui.download.DownloadFormat;
 import ru.ak.lawcrmsystem3.entity.Document;
 import com.lowagie.text.Paragraph;
 import com.lowagie.text.pdf.PdfWriter;
@@ -32,9 +38,7 @@ import ru.ak.lawcrmsystem3.view.deal.DealListView;
 import ru.ak.lawcrmsystem3.view.main.MainView;
 
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
@@ -54,7 +58,6 @@ public class TranscriptionRecordDetailView extends StandardDetailView<Transcript
     private InstanceLoader<TranscriptionRecord> transcriptionRecordDl;
     @ViewComponent
     private InstanceContainer<TranscriptionRecord> transcriptionRecordDc;
-    //===============
     @ViewComponent
     private Button attachToDealButton; // Новый компонент для кнопки
     @Autowired
@@ -65,12 +68,16 @@ public class TranscriptionRecordDetailView extends StandardDetailView<Transcript
     private FileStorage fileStorage;
     @Autowired
     private UiComponents uiComponents;
-
-    //===========
     @Autowired
     private AudioTranscriptionService audioTranscriptionService;
     @Autowired
     private Notifications notifications;
+    @Autowired
+    private Downloader downloader;
+
+    @Autowired
+    private FileTransferService fileTransferService;
+
 
     @Subscribe
     public void onBeforeShow(final BeforeShowEvent event) {
@@ -83,26 +90,29 @@ public class TranscriptionRecordDetailView extends StandardDetailView<Transcript
     public void onDownloadPdfButtonClick(final ClickEvent<Button> event) {
         TranscriptionRecord transcriptionRecord = transcriptionRecordDc.getItemOrNull();
 
-        if (transcriptionRecord == null) {
-            notifications.create("No record selected").show();
-            return;
-        }
-
-        if (transcriptionRecord.getTextContent() == null || transcriptionRecord.getTextContent().isEmpty()) {
-            notifications.create("Text content is empty").show();
+        if (transcriptionRecord == null || transcriptionRecord.getTextContent() == null ||
+                transcriptionRecord.getTextContent().isEmpty()) {
+            notifications.create("Текст транскрипции пуст или запись не выбрана").show();
             return;
         }
 
         try {
-            // Используем метод из сервиса для генерации PDF
+            // Генерируем PDF-байты
             byte[] pdfBytes = audioTranscriptionService.createPdfWithRussianFont(transcriptionRecord.getTextContent());
+            String fileName = "transcription_" + System.currentTimeMillis() + ".pdf";
 
-            // Показываем PDF в диалоге (как в сервисе)
-            audioTranscriptionService.showPdfInDialog(pdfBytes);
+            // Скачиваем файл
+            downloader.download(
+                    pdfBytes,
+                    fileName,
+                    DownloadFormat.PDF
+            );
 
         } catch (Exception e) {
-            log.error("PDF generation failed", e);
-            notifications.create("Failed to generate PDF").show();
+            log.error("Не удалось сгенерировать PDF", e);
+            notifications.create("Ошибка при генерации PDF: " + e.getMessage())
+                    .withType(Notifications.Type.ERROR)
+                    .show();
         }
     }
 
@@ -188,6 +198,7 @@ public class TranscriptionRecordDetailView extends StandardDetailView<Transcript
         PdfWriter.getInstance(document, outputStream);
         document.open();
         document.add(new Paragraph(text));
+        log.info("Запущен метод generatePdf");
         document.close();
         return outputStream.toByteArray();
     }

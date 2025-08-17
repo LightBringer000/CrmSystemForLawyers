@@ -38,7 +38,7 @@ public class LegalDocumentData {
     @Column(name = "TITLE", length = 1000)
     private String title;
 
-    @Column(name = "CONTENT", length = 20000)
+    @Column(name = "CONTENT")
     private String content; // Основное содержание документа
 
     @Column(name = "REQUESTS", length = 4000)

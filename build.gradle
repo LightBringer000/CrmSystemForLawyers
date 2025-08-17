@@ -80,7 +80,6 @@ dependencies {
 
     implementation 'io.jmix.flowui:jmix-flowui-starter'
 
-
 }
 
 configurations.implementation {

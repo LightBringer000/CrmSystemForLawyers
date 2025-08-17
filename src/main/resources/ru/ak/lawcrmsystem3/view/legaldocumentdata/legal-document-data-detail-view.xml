@@ -27,62 +27,62 @@
                     </responsiveSteps>
 
                     <!-- Блок 1: Адресат -->
-                    <textArea id="toField" property="to"
+                    <richTextEditor id="toField" property="to"
                               label="Кому (адресат)"
                               helperText="Укажите адресата документа, его адрес, а, при необходимости, и иные реквизиты (ИНН, СНИЛС, ОГРН и т.п.)"
                               width="100%"
                               height="200px"/>
 
                     <!-- Блок 2: Заявители -->
-                    <textArea id="fromField" property="from"
+                    <richTextEditor id="fromField" property="from"
                               label="От кого (заявители)"
                               helperText="Укажите заявителей, каждого с новой строки"
                               width="100%"
                               height="200px"/>
 
                     <!-- Блок 3: Участники -->
-                    <textArea id="participantsField" property="participants"
+                    <richTextEditor id="participantsField" property="participants"
                               label="Участники процесса"
                               helperText="ФИО и роль каждого участника с новой строки"
                               width="100%"
                               height="350px"/>
 
                     <!-- Блок 4: Дополнительная информация -->
-                    <textArea id="otherInfoField" property="otherInfo"
+                    <richTextEditor id="otherInfoField" property="otherInfo"
                               label="Дополнительная информация"
                               helperText="Размер госпошлины и другие детали"
                               width="100%"
                               height="200px"/>
 
                     <!-- Блок 5: Название документа -->
-                    <textArea id="titleField" property="title"
+                    <richTextEditor id="titleField" property="title"
                                label="Название документа"
                                width="100%"
                                height="200px"/>
 
                     <!-- Блок 6: Содержание (высота как страница А4) -->
-                    <textArea id="contentField" property="content"
-                              label="Содержание документа"
-                              width="100%"
-                              height="1500px"
-                              classNames="a4-content-field"/>
+                    <richTextEditor id="contentField" property="content"
+                                        label="Содержание документа"
+                                        width="100%"
+                                        height="1500px"
+                                        classNames="a4-content-field"/>
 
                     <!-- Блок 7: Просительная часть -->
-                    <textArea id="requestsField" property="requests"
+                    <richTextEditor id="requestsField" property="requests"
                               label="Просительная часть"
                               helperText="Каждый пункт требования с новой строки"
                               width="100%"
                               height="350px"/>
 
                     <!-- Блок 8: Приложения -->
-                    <textArea id="attachmentsField" property="attachments"
+                    <richTextEditor id="attachmentsField" property="attachments"
                               label="Приложения"
                               helperText="Перечислите приложения, каждое с новой строки"
                               width="100%"
                               height="350px"/>
 
                     <!-- Блок 9: Подписанты -->
-                    <textArea id="signatoriesField" property="signatories"
+                    <richTextEditor id="signatoriesField" property="signatories"
                               label="Подписанты"
                               helperText="Перечислите Ф.И.О. и должность лиц, подписавших документ. Каждого с новой строки"
                               width="100%"

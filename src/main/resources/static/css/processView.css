@@ -876,3 +876,19 @@
 .action-btn i, .floating-btn i {
     margin-right: 6px;
 }
+
+
+
+.stage-item {
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+.stage-item.dragging {
+    opacity: 0.5;
+    transform: scale(1.02);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.stage-item.drag-over {
+    border-top: 2px solid var(--lumo-primary-color);
+}
