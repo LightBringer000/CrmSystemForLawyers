@@ -1,38 +1,20 @@
 package ru.ak.lawcrmsystem3.view.legaldocumentdata;
 
 import com.vaadin.flow.component.ClickEvent;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.page.Page;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.frontend.installer.FileDownloader;
 import io.jmix.flowui.Notifications;
-import io.jmix.flowui.component.layout.ViewLayout;
 import io.jmix.flowui.component.richtexteditor.RichTextEditor;
 import io.jmix.flowui.download.DownloadFormat;
 import io.jmix.flowui.download.Downloader;
 import io.jmix.flowui.view.*;
-import org.apache.poi.xwpf.usermodel.*;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Node;
-import org.jsoup.nodes.TextNode;
-import org.jsoup.safety.Safelist;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.STMerge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.lang.NonNull;
-import ru.ak.lawcrmsystem3.app.AudioTranscriptionService;
 import ru.ak.lawcrmsystem3.app.DocumentGeneratorService;
 import ru.ak.lawcrmsystem3.entity.LegalDocumentData;
 import ru.ak.lawcrmsystem3.view.main.MainView;
-
-import java.io.File;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -247,6 +229,28 @@ public class LegalDocumentDataDetailView extends StandardDetailView<LegalDocumen
                 <pre>&lt;code-block/&gt;</pre>
                 <blockquote>Blockquote</blockquote>
                 """);
+    }
+
+
+    @Subscribe
+    public void onBeforeSave(final BeforeSaveEvent event) {
+        // Получаем сущность, которая собирается быть сохраненной
+        LegalDocumentData documentData = getEditedEntity();
+
+        // Очищаем все текстовые поля от HTML-тегов,
+        // используя те же методы, что и при генерации документа
+        documentData.setTo(stripHtmlTags(documentData.getTo()));
+        documentData.setFrom(stripHtmlTags(documentData.getFrom()));
+        documentData.setParticipants(stripHtmlTags(documentData.getParticipants()));
+        documentData.setOtherInfo(stripHtmlTags(documentData.getOtherInfo()));
+        documentData.setTitle(stripHtmlTags(documentData.getTitle()));
+        // Для content используем более мягкую очистку, если это нужно для БД
+        documentData.setContent(stripHtmlTags2(documentData.getContent()));
+        documentData.setRequests(stripHtmlTags(documentData.getRequests()));
+        documentData.setAttachments(stripHtmlTags(documentData.getAttachments()));
+        documentData.setSignatories(stripHtmlTags(documentData.getSignatories()));
+
+        // После этих операций сущность с очищенными данными будет сохранена
     }
 
     @Subscribe("generateDocumentBtn")
