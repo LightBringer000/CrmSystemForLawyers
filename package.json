@@ -26,6 +26,7 @@
     "date-fns": "2.29.3",
     "lit": "3.2.1",
     "moment": "2.30.1",
+    "quill-table-ui": "latest",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.28.0"
@@ -129,6 +130,6 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "80a499571db6daf86eff778a1ba8355badb4139e0260d739892cba76ba18661b"
+    "hash": "a151a3ed45070f96c8c03dc485bd3a635239c374f3b75057fc4b1620f996a767"
   }
 }

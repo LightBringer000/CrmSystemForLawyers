@@ -1,23 +1,38 @@
 package ru.ak.lawcrmsystem3.view.legaldocumentdata;
 
 import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.page.Page;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.frontend.installer.FileDownloader;
 import io.jmix.flowui.Notifications;
+import io.jmix.flowui.component.layout.ViewLayout;
 import io.jmix.flowui.component.richtexteditor.RichTextEditor;
 import io.jmix.flowui.download.DownloadFormat;
 import io.jmix.flowui.download.Downloader;
 import io.jmix.flowui.view.*;
+import org.apache.poi.xwpf.usermodel.*;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
+import org.jsoup.safety.Safelist;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STMerge;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.lang.NonNull;
+import ru.ak.lawcrmsystem3.app.AudioTranscriptionService;
 import ru.ak.lawcrmsystem3.app.DocumentGeneratorService;
 import ru.ak.lawcrmsystem3.entity.LegalDocumentData;
 import ru.ak.lawcrmsystem3.view.main.MainView;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -28,6 +43,8 @@ import java.time.format.DateTimeFormatter;
 @ViewDescriptor(path = "legal-document-data-detail-view.xml")
 @EditedEntityContainer("legalDocumentDataDc")
 public class LegalDocumentDataDetailView extends StandardDetailView<LegalDocumentData> {
+
+    private static final Logger log = LoggerFactory.getLogger(LegalDocumentDataDetailView.class);
 
     @ViewComponent
     protected RichTextEditor toField;
@@ -56,7 +73,6 @@ public class LegalDocumentDataDetailView extends StandardDetailView<LegalDocumen
 
     @Autowired
     private Downloader downloader;
-
 
     @Subscribe
     protected void onInit(InitEvent event) {
@@ -233,58 +249,6 @@ public class LegalDocumentDataDetailView extends StandardDetailView<LegalDocumen
                 """);
     }
 
-//    @Subscribe("generateDocumentBtn")
-//    public void onGenerateDocumentBtnClick(ClickEvent<Button> event) {
-//        try {
-//            LegalDocumentData documentData = getEditedEntity();
-//
-//            // Извлекаем HTML-содержимое из RichTextEditor'ов
-//            String toHtml = toField.getValue();
-//            String fromHtml = fromField.getValue();
-//            String participantsHtml = participantsField.getValue();
-//            String otherInfoHtml = otherInfoField.getValue();
-//            String titleHtml = titleField.getValue();
-//            String contentHtml = contentField.getValue();
-//            String requestsHtml = requestsField.getValue();
-//            String attachmentsHtml = attachmentsField.getValue();
-//            String signatoriesHtml = signatoriesField.getValue();
-//
-//            // Удаляем HTML-теги перед сохранением в entity
-//            documentData.setTo(stripHtmlTags(toHtml));
-//            documentData.setFrom(stripHtmlTags(fromHtml));
-//            documentData.setParticipants(stripHtmlTags(participantsHtml));
-//            documentData.setOtherInfo(stripHtmlTags(otherInfoHtml));
-//            documentData.setTitle(stripHtmlTags(titleHtml));
-//            documentData.setContent(stripHtmlTags(contentHtml));
-//            documentData.setRequests(stripHtmlTags(requestsHtml));
-//            documentData.setAttachments(stripHtmlTags(attachmentsHtml));
-//            documentData.setSignatories(stripHtmlTags(signatoriesHtml));
-//
-//
-//            // Генерируем временный файл
-//            String fileName = generateFileName(documentData);
-//            Path tempFile = Files.createTempFile("law_doc_", ".docx");
-//
-//            // Генерируем документ
-//            documentGeneratorService.generateLegalDocument(documentData, tempFile.toString());
-//
-//            // Предлагаем скачать
-//            downloader.download(
-//                    Files.readAllBytes(tempFile),
-//                    fileName,
-//                    DownloadFormat.DOCX
-//            );
-//
-//            notifications.create("Документ успешно сгенерирован")
-//                    .show();
-//
-//        } catch (IOException e) {
-//            notifications.create("Ошибка при генерации документа: " + e.getMessage())
-//                    .show();
-//            e.printStackTrace();
-//        }
-//    }
-
     @Subscribe("generateDocumentBtn")
     public void onGenerateDocumentBtnClick(ClickEvent<Button> event) {
         try {
@@ -303,19 +267,19 @@ public class LegalDocumentDataDetailView extends StandardDetailView<LegalDocumen
 
             // ⚠️ Ключевое изменение: НЕ удаляем HTML-теги для поля content.
             // Передаем полный HTML в сервис.
-            documentData.setContent(contentHtml);
+            // documentData.setContent(contentHtml);
 
-            // Для остальных полей, где изображения не ожидаются,
-            // оставляем удаление тегов.
             documentData.setTo(stripHtmlTags(toHtml));
             documentData.setFrom(stripHtmlTags(fromHtml));
             documentData.setParticipants(stripHtmlTags(participantsHtml));
             documentData.setOtherInfo(stripHtmlTags(otherInfoHtml));
             documentData.setTitle(stripHtmlTags(titleHtml));
+            documentData.setContent(stripHtmlTags2(contentHtml));
+
+            System.out.println("Значение contentHtml: " + contentHtml);
             documentData.setRequests(stripHtmlTags(requestsHtml));
             documentData.setAttachments(stripHtmlTags(attachmentsHtml));
             documentData.setSignatories(stripHtmlTags(signatoriesHtml));
-
 
             // Генерируем временный файл
             String fileName = generateFileName(documentData);
@@ -340,56 +304,6 @@ public class LegalDocumentDataDetailView extends StandardDetailView<LegalDocumen
             e.printStackTrace();
         }
     }
-
-//    @Subscribe("generateDocumentBtn")
-//    public void onGenerateDocumentBtnClick(ClickEvent<Button> event) {
-//        try {
-//            LegalDocumentData documentData = getEditedEntity();
-//
-//            // Извлекаем HTML-содержимое из RichTextEditor'ов
-//            String toHtml = toField.getValue();
-//            String fromHtml = fromField.getValue();
-//            String participantsHtml = participantsField.getValue();
-//            String otherInfoHtml = otherInfoField.getValue();
-//            String titleHtml = titleField.getValue();
-//            String contentHtml = contentField.getValue();
-//            String requestsHtml = requestsField.getValue();
-//            String attachmentsHtml = attachmentsField.getValue();
-//            String signatoriesHtml = signatoriesField.getValue();
-//
-//            // Вместо удаления HTML-тегов, сохраняйте полное HTML-содержимое для поля content
-//            documentData.setTo(stripHtmlTags(toHtml));
-//            documentData.setFrom(stripHtmlTags(fromHtml));
-//            documentData.setParticipants(stripHtmlTags(participantsHtml));
-//            documentData.setOtherInfo(stripHtmlTags(otherInfoHtml));
-//            documentData.setTitle(stripHtmlTags(titleHtml));
-//            // ➡️ Вот ключевое изменение: передаём contentHtml напрямую
-//            documentData.setContent(contentHtml);
-//            documentData.setRequests(stripHtmlTags(requestsHtml));
-//            documentData.setAttachments(stripHtmlTags(attachmentsHtml));
-//            documentData.setSignatories(stripHtmlTags(signatoriesHtml));
-//
-//            // Дальнейший код остаётся без изменений...
-//            String fileName = generateFileName(documentData);
-//            Path tempFile = Files.createTempFile("law_doc_", ".docx");
-//
-//            documentGeneratorService.generateLegalDocument(documentData, tempFile.toString());
-//
-//            downloader.download(
-//                    Files.readAllBytes(tempFile),
-//                    fileName,
-//                    DownloadFormat.DOCX
-//            );
-//
-//            notifications.create("Документ успешно сгенерирован")
-//                    .show();
-//
-//        } catch (IOException e) {
-//            notifications.create("Ошибка при генерации документа: " + e.getMessage())
-//                    .show();
-//            e.printStackTrace();
-//        }
-//    }
 
     /**
      * Вспомогательный метод для удаления HTML-тегов из строки.
@@ -418,6 +332,28 @@ public class LegalDocumentDataDetailView extends StandardDetailView<LegalDocumen
         // Можно добавить другие часто встречающиеся сущности, если необходимо.
 
         return noTags.trim(); // Удаляем пробелы в начале и конце
+    }
+
+    private String stripHtmlTags2(String htmlString) {
+        if (htmlString == null || htmlString.isEmpty()) {
+            return "";
+        }
+        // Удаляем все HTML-теги, включая атрибуты.
+        // Пример: <p style="color:red;"> -> ""
+        String noTags = htmlString.replaceAll("<p>", "");
+
+        return noTags.trim(); // Удаляем пробелы в начале и конце
+    }
+
+    private String keepOnlyImagesAndTablesTags(String htmlString) {
+        if (htmlString == null || htmlString.isEmpty()) {
+            return "";
+        }
+
+        // Добавлен тег 'pre' в регулярное выражение
+        String result = htmlString.replaceAll("<(?!/?(img|table|tr|td|th|tbody|thead|tfoot|pre)(\\s|>))[^>]+>", "");
+
+        return result.trim();
     }
 
 

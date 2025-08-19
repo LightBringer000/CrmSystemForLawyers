@@ -5,15 +5,17 @@ import org.apache.poi.util.Units;
 import org.apache.poi.xwpf.usermodel.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
 import org.springframework.stereotype.Component;
 import ru.ak.lawcrmsystem3.entity.LegalDocumentData;
-
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
@@ -40,33 +42,27 @@ public class DocumentGeneratorService {
             // Для "Кому" не нужен общий отступ, и отступ первой строки тоже не нужен.
             createSimpleSection(document, "Кому:", data.getTo(), ParagraphAlignment.RIGHT, 0, 0);
         }
-
         // 2. От кого: (по правому краю)
         if (StringUtils.isNotBlank(data.getFrom())) {
             createListSection(document, "От кого:", splitString(data.getFrom()), ParagraphAlignment.RIGHT);
         }
-
         // 3. Участники: (по правому краю)
         if (StringUtils.isNotBlank(data.getParticipants())) {
             createListSection(document, "Участники:", splitString(data.getParticipants()), ParagraphAlignment.RIGHT);
         }
-
         // 4. Дополнительная информация: (по правому краю)
         if (StringUtils.isNotBlank(data.getOtherInfo())) {
             createListSection(document, "Дополнительная информация:", splitString(data.getOtherInfo()), ParagraphAlignment.RIGHT);
         }
-
         // 5. Название документа (по центру)
         if (StringUtils.isNotBlank(data.getTitle())) {
             createTitle(document, data.getTitle());
         }
-
         // 6. Содержание документа (по ширине, с общим левым отступом и отступом первой строки)
         if (StringUtils.isNotBlank(data.getContent())) {
             createContent(document, data.getContent());
         }
         addSpaceBetweenSections(document); // Пробел после Содержания
-
 
         // 7. Просительная часть (по ширине, с общим левым отступом и отступом первой строки)
         if (StringUtils.isNotBlank(data.getRequests())) {
@@ -74,17 +70,14 @@ public class DocumentGeneratorService {
         }
         addSpaceBetweenSections(document); // Пробел после Просительной части
 
-
         // 8. Приложения (по ширине, с общим левым отступом и отступом первой строки)
         if (StringUtils.isNotBlank(data.getAttachments())) {
             createAttachments(document, splitString(data.getAttachments()));
         }
-
         // 9. Подписанты (по ширине, с общим левым отступом и отступом первой строки)
         if (StringUtils.isNotBlank(data.getSignatories())) {
             createSignatories(document, splitString(data.getSignatories()));
         }
-
         // Сохранение
         try (FileOutputStream out = new FileOutputStream(outputPath)) {
             document.write(out);
@@ -218,150 +211,298 @@ public class DocumentGeneratorService {
         run.setText(text);
     }
 
-//    private void createContent(XWPFDocument document, String content) {
-//        List<String> paragraphs = splitString(content);
-//        for (String paraText : paragraphs) {
-//            // Для содержания используем общий левый отступ И отступ первой строки
-//            createParagraphWithIndent(document, paraText, ParagraphAlignment.BOTH, PARAGRAPH_LEFT_INDENT_EMU, PARAGRAPH_FIRST_LINE_INDENT_EMU);
-//        }
-//    }
+private void createContent(XWPFDocument document, String contentHtml) throws IOException {
+    org.jsoup.nodes.Document doc = Jsoup.parse(contentHtml);
 
-    //=======================new the last
-//    private void createContent(XWPFDocument document, String contentHtml) {
-//        // 1. Parse the HTML using a library like Jsoup
-//        org.jsoup.nodes.Document doc = Jsoup.parse(contentHtml);
-//        org.jsoup.select.Elements paragraphs = doc.select("p, h1, h2, h3, ul, ol, img");
-//
-//        for (org.jsoup.nodes.Element element : paragraphs) {
-//            if (element.tagName().equals("p") || element.tagName().startsWith("h")) {
-//                // Handle text paragraphs and headings
-//                XWPFParagraph paragraph = setupParagraph(document, ParagraphAlignment.BOTH, PARAGRAPH_LEFT_INDENT_EMU, PARAGRAPH_FIRST_LINE_INDENT_EMU);
-//                XWPFRun run = paragraph.createRun();
-//                setupRun(run);
-//
-//                // Handle bold, italic, etc., from the HTML
-//                if (element.select("b, strong").size() > 0) {
-//                    run.setBold(true);
-//                }
-//                if (element.select("i, em").size() > 0) {
-//                    run.setItalic(true);
-//                }
-//                // You would need to add more logic for other tags like u, s, sup, sub, a...
-//
-//                run.setText(element.text());
-//            } else if (element.tagName().equals("img")) {
-//                // Handle images
-//                String src = element.attr("src");
-//                if (src.startsWith("data:image")) {
-//                    // Extract Base64 and image type
-//                    String[] parts = src.split(",");
-//                    String mimeType = parts[0].split(":")[1].split(";")[0];
-//                    String base64Data = parts[1];
-//
-//                    try {
-//                        byte[] imageBytes = Base64.getDecoder().decode(base64Data);
-//                        // Create a paragraph for the image
-//                        XWPFParagraph paragraph = document.createParagraph();
-//                        paragraph.setAlignment(ParagraphAlignment.CENTER); // Center the image
-//
-//                        // Add the image to the paragraph
-//                        XWPFRun run = paragraph.createRun();
-//                        run.addPicture(
-//                                new ByteArrayInputStream(imageBytes),
-//                                getPictureType(mimeType),
-//                                "image." + mimeType.substring(mimeType.lastIndexOf("/") + 1),
-//                                Units.toEMU(200), // Width in EMU (adjust as needed)
-//                                Units.toEMU(200)  // Height in EMU (adjust as needed)
-//                        );
-//                    } catch (Exception e) {
-//                        // Log the error
-//                        System.err.println("Error processing image: " + e.getMessage());
-//                    }
-//                }
-//            }
-//        }
-//    }
-//    private int getPictureType(String mimeType) {
-//        if (mimeType.contains("jpeg")) {
-//            return XWPFDocument.PICTURE_TYPE_JPEG;
-//        } else if (mimeType.contains("png")) {
-//            return XWPFDocument.PICTURE_TYPE_PNG;
-//        } else if (mimeType.contains("gif")) {
-//            return XWPFDocument.PICTURE_TYPE_GIF;
-//        }
-//        return XWPFDocument.PICTURE_TYPE_PICT;
-//    }
+    // Проходим по всем узлам (элементам и тексту) в <body>
+    for (org.jsoup.nodes.Node node : doc.body().childNodes()) {
+        if (node instanceof TextNode) {
+            // Создаём параграф для текстовых узлов верхнего уровня
+            String text = ((TextNode) node).text();
+            if (!text.trim().isEmpty()) {
+                XWPFParagraph paragraph = document.createParagraph();
+                XWPFRun run = paragraph.createRun();
+                run.setText(text);
+            }
+        } else if (node instanceof Element) {
+            Element element = (Element) node;
+            String tagName = element.tagName();
 
-    private void createContent(XWPFDocument document, String contentHtml) {
-        // 1. Parse the HTML using Jsoup
-        org.jsoup.nodes.Document doc = Jsoup.parse(contentHtml);
-        Elements paragraphs = doc.select("p, h1, h2, h3, ul, ol, img, b, i, strong, em");
+            if (tagName.equals("p") || tagName.matches("h[1-6]")) {
+                // Если это абзац или заголовок, создаём новый параграф и применяем форматирование
+                XWPFParagraph paragraph = document.createParagraph();
+                applyFormattingAndText(paragraph, element);
+            } else if (tagName.equals("ul")) {
+                createList(document, element, ListType.BULLETED);
+            } else if (tagName.equals("ol")) {
+                createList(document, element, ListType.NUMBERED);
+            } else if (tagName.equals("img")) {
+                createImageFromHtml(document, element);
+            } else if (tagName.equals("pre")) {
+                createTableFromPre(document, element);
+            } else if (tagName.equals("table")) {
+                createTableFromHtml(document, element);
+            }
+        }
+    }
+}
 
-        for (Element element : paragraphs) {
-            if (element.tagName().equals("p") || element.tagName().startsWith("h")) {
-                // Обработка текстовых абзацев и заголовков
-                XWPFParagraph paragraph = setupParagraph(document, ParagraphAlignment.BOTH, PARAGRAPH_LEFT_INDENT_EMU, PARAGRAPH_FIRST_LINE_INDENT_EMU);
+    /**
+     * Создает изображение в документе Word из HTML-элемента <img>.
+     */
+    private void createImageFromHtml(XWPFDocument document, Element imgElement) {
+        String src = imgElement.attr("src");
+        if (src.startsWith("data:image")) {
+            System.out.println("Найден тег <img> с данными Base64.");
+
+            String[] parts = src.split(",");
+            String mimeType = parts[0].split(":")[1].split(";")[0];
+            String base64Data = parts[1];
+
+            System.out.println("MIME Type: " + mimeType);
+
+            try {
+                byte[] imageBytes = Base64.getDecoder().decode(base64Data);
+                System.out.println("Размер данных изображения (в байтах): " + imageBytes.length);
+
+                BufferedImage originalImage = ImageIO.read(new ByteArrayInputStream(imageBytes));
+                if (originalImage == null) {
+                    System.err.println("Ошибка: не удалось прочитать данные изображения в BufferedImage.");
+                    return;
+                }
+                System.out.println("Изображение успешно прочитано. Размеры: " + originalImage.getWidth() + "x" + originalImage.getHeight());
+
+                int originalWidth = originalImage.getWidth();
+                int originalHeight = originalImage.getHeight();
+                int desiredWidthInPx = 450;
+                int desiredHeightInPx = (int) ((double) originalHeight * desiredWidthInPx / originalWidth);
+
+                XWPFParagraph paragraph = document.createParagraph();
+                paragraph.setAlignment(ParagraphAlignment.CENTER);
+
+                XWPFRun run = paragraph.createRun();
+                int pictureType = getPictureType(mimeType);
+                System.out.println("Полученный тип изображения: " + pictureType);
+
+                run.addPicture(
+                        new ByteArrayInputStream(imageBytes),
+                        pictureType,
+                        "image." + mimeType.substring(mimeType.lastIndexOf("/") + 1),
+                        Units.toEMU(desiredWidthInPx),
+                        Units.toEMU(desiredHeightInPx)
+                );
+                System.out.println("Изображение успешно добавлено в документ.");
+            } catch (IOException e) {
+                System.err.println("Ошибка обработки данных изображения: " + e.getMessage());
+                e.printStackTrace();
+            } catch (Exception e) {
+                System.err.println("Непредвиденная ошибка при обработке элемента: " + e.getMessage());
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("Найден тег <img> без данных Base64. Пропускаем.");
+        }
+    }
+
+    private void createTableFromPre(XWPFDocument document, Element preElement) {
+        // Извлекаем чистый текст, сохраняя переносы строк
+        String preText = preElement.text();
+        String[] lines = preText.split("\n");
+
+        if (lines.length == 0) {
+            return; // Если текста нет, выходим
+        }
+
+        XWPFTable table = document.createTable();
+
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i];
+
+            // Разделяем строку на ячейки по одному или нескольким пробелам
+            String[] cells = line.trim().split("\\s{2,}"); // Два или более пробела как разделитель
+
+            XWPFTableRow tableRow = (i == 0) ? table.getRow(0) : table.createRow();
+
+            for (int j = 0; j < cells.length; j++) {
+                String cellText = cells[j];
+                XWPFTableCell tableCell = (j == 0 && i == 0) ? tableRow.getCell(0) : tableRow.addNewTableCell();
+
+                // Удаляем существующие пустые параграфы в ячейке
+                for (int k = tableCell.getParagraphs().size() - 1; k >= 0; k--) {
+                    tableCell.removeParagraph(k);
+                }
+
+                // Создаем новый параграф и добавляем текст из ячейки
+                XWPFParagraph paragraph = tableCell.addParagraph();
+                XWPFRun run = paragraph.createRun();
+                run.setText(cellText);
+            }
+        }
+    }
+
+    /**
+     * Рекурсивно проходит по дочерним узлам HTML-элемента, создавая XWPFRun
+     * и применяя соответствующее форматирование.
+     */
+    private void applyFormattingAndText(XWPFParagraph paragraph, Element element) {
+        for (org.jsoup.nodes.Node node : element.childNodes()) {
+            if (node instanceof TextNode) {
+                String text = ((TextNode) node).text();
+                if (StringUtils.isNotBlank(text)) {
+                    XWPFRun run = paragraph.createRun();
+                    setupRun(run);
+                    run.setText(text);
+                }
+            } else if (node instanceof Element) {
+
+                Element childElement = (Element) node;
+                // Если это изображение, обрабатываем его здесь
+                if (childElement.tagName().equals("img")) {
+                    // Создаем новый параграф для изображения, так как оно обычно на отдельной строке
+                    XWPFParagraph imgParagraph = paragraph.getDocument().createParagraph();
+                    createImageFromHtml(paragraph.getDocument(), childElement);
+                }
+
+
+
                 XWPFRun run = paragraph.createRun();
                 setupRun(run);
 
-                // Обработка форматирования (жирный, курсив и т.д.)
-                if (element.select("b, strong").size() > 0) {
+                // Применяем форматирование
+                if (childElement.tagName().equals("b") || childElement.tagName().equals("strong")) {
                     run.setBold(true);
                 }
-                if (element.select("i, em").size() > 0) {
+                if (childElement.tagName().equals("i") || childElement.tagName().equals("em")) {
                     run.setItalic(true);
                 }
+                if (childElement.tagName().equals("u")) {
+                    run.setUnderline(UnderlinePatterns.SINGLE);
+                }
+                if (childElement.tagName().equals("s") || childElement.tagName().equals("del")) {
+                    run.setStrike(true);
+                }
+                // 💡 Исправленная логика для нижнего индекса
+                if (childElement.tagName().equals("sub")) {
+                    run.setSubscript(VerticalAlign.SUBSCRIPT);
+                }
+                // 💡 Исправленная логика для верхнего индекса
+                if (childElement.tagName().equals("sup")) {
+                    run.setSubscript(VerticalAlign.SUPERSCRIPT);
+                }
 
-                run.setText(element.text());
-            } else if (element.tagName().equals("img")) {
-                // Обработка изображений
-                String src = element.attr("src");
-                if (src.startsWith("data:image")) {
-                    // Извлечение Base64 и типа изображения
-                    String[] parts = src.split(",");
-                    String mimeType = parts[0].split(":")[1].split(";")[0];
-                    String base64Data = parts[1];
-
-                    try {
-                        byte[] imageBytes = Base64.getDecoder().decode(base64Data);
-
-                        // Получаем оригинальные размеры изображения для пропорционального масштабирования
-                        BufferedImage originalImage = ImageIO.read(new ByteArrayInputStream(imageBytes));
-                        if (originalImage == null) {
-                            System.err.println("Failed to read image data.");
-                            continue;
-                        }
-                        int originalWidth = originalImage.getWidth();
-                        int originalHeight = originalImage.getHeight();
-
-                        // Задаем желаемую ширину в пикселях.
-                        // Для формата A4, ширина страницы (без полей) примерно 595 пикселей (при 72 dpi).
-                        // Установка 450-500px позволяет изображению вписаться с отступами.
-                        int desiredWidthInPx = 450;
-                        int desiredHeightInPx = (int) ((double) originalHeight * desiredWidthInPx / originalWidth);
-
-                        // Создаем абзац для изображения и центрируем его
-                        XWPFParagraph paragraph = document.createParagraph();
-                        paragraph.setAlignment(ParagraphAlignment.CENTER);
-
-                        // Добавляем изображение с вычисленными размерами в EMU
-                        XWPFRun run = paragraph.createRun();
-                        run.addPicture(
-                                new ByteArrayInputStream(imageBytes),
-                                getPictureType(mimeType),
-                                "image." + mimeType.substring(mimeType.lastIndexOf("/") + 1),
-                                Units.toEMU(desiredWidthInPx),
-                                Units.toEMU(desiredHeightInPx)
-                        );
-                    } catch (IOException e) {
-                        System.err.println("Error processing image data: " + e.getMessage());
-                    } catch (Exception e) {
-                        System.err.println("Error processing element: " + e.getMessage());
-                    }
+                // Обработка ссылок
+                if (childElement.tagName().equals("a")) {
+                    run.setText(childElement.text());
+                    run.setUnderline(UnderlinePatterns.SINGLE);
+                    run.setColor("0000FF"); // Синий цвет для ссылок
+                    // Чтобы сделать гиперссылку рабочей, нужно использовать другой подход,
+                    // это только визуальное оформление.
+                } else {
+                    // Рекурсивный вызов для вложенных элементов
+                    applyFormattingAndText(paragraph, childElement);
                 }
             }
-            // ... можно добавить обработку других тегов (ul, ol)
-        }}
+        }
+    }
+
+    private enum ListType {
+        BULLETED,
+        NUMBERED
+    }
+
+    /**
+     * Создает список (маркированный или нумерованный) из HTML-элементов <ul> или <ol>.
+     */
+    private void createList(XWPFDocument document, Element listElement, ListType type) {
+        // Получаем или создаем новый стиль нумерации
+        BigInteger abstractNumId;
+        if (type == ListType.BULLETED) {
+            XWPFAbstractNum abstractNum = createAbstractNumForBullet(document);
+            abstractNumId = document.getNumbering().addAbstractNum(abstractNum);
+        } else {
+            XWPFAbstractNum abstractNum = createAbstractNumForNumbered(document);
+            abstractNumId = document.getNumbering().addAbstractNum(abstractNum);
+        }
+
+        for (Element listItem : listElement.children()) {
+            if (listItem.tagName().equals("li")) {
+                XWPFParagraph paragraph = document.createParagraph();
+                paragraph.setSpacingAfter(100);
+
+                // Создаем новый CTNum и связываем его с abstractNumId
+                CTNum ctNum = CTNum.Factory.newInstance();
+                ctNum.addNewAbstractNumId().setVal(abstractNumId);
+                ctNum.setNumId(BigInteger.valueOf(1)); // Устанавливаем уникальный ID для списка.
+
+                // Используем addNum с объектом CTNum
+                XWPFNum num = new XWPFNum(ctNum, document.getNumbering());
+                document.getNumbering().addNum(num);
+
+                // Привязываем параграф к этому стилю списка
+                paragraph.setNumID(ctNum.getNumId());
+
+                // Добавление текста элемента списка
+                applyFormattingAndText(paragraph, listItem);
+            }
+        }
+    }
+
+    // Вспомогательные методы для создания стилей списков (нужны для Apache POI)
+    private XWPFAbstractNum createAbstractNumForBullet(XWPFDocument document) {
+        CTAbstractNum cTAbstractNum = CTAbstractNum.Factory.newInstance();
+        cTAbstractNum.addNewLvl().addNewPPr().addNewNumPr().addNewIlvl().setVal(BigInteger.valueOf(0));
+        cTAbstractNum.getLvlArray(0).addNewPPr().addNewInd().setLeft(BigInteger.valueOf(720));
+        cTAbstractNum.getLvlArray(0).getLvlText().setVal("•");
+        cTAbstractNum.getLvlArray(0).getLvlJc().setVal(STJc.LEFT);
+        cTAbstractNum.getLvlArray(0).addNewRPr().addNewRFonts().setHint(STHint.DEFAULT);
+
+        // Добавляем CTAbstractNum в XWPFAbstractNum
+        XWPFAbstractNum abstractNum = new XWPFAbstractNum(cTAbstractNum);
+        return abstractNum;
+    }
+
+    private XWPFAbstractNum createAbstractNumForNumbered(XWPFDocument document) {
+        CTAbstractNum cTAbstractNum = CTAbstractNum.Factory.newInstance();
+        cTAbstractNum.addNewLvl().addNewPPr().addNewNumPr().addNewIlvl().setVal(BigInteger.valueOf(0));
+        cTAbstractNum.getLvlArray(0).getLvlText().setVal("%1.");
+        cTAbstractNum.getLvlArray(0).getLvlJc().setVal(STJc.LEFT);
+        cTAbstractNum.getLvlArray(0).addNewPPr().addNewInd().setLeft(BigInteger.valueOf(720));
+        cTAbstractNum.getLvlArray(0).addNewRPr().addNewRFonts().setHint(STHint.DEFAULT);
+
+        // Добавляем CTAbstractNum в XWPFAbstractNum
+        XWPFAbstractNum abstractNum = new XWPFAbstractNum(cTAbstractNum);
+        return abstractNum;
+    }
+
+    private void createTableFromHtml(XWPFDocument document, Element tableElement) {
+        XWPFTable table = document.createTable();
+        table.setWidth("100%"); // Устанавливаем ширину таблицы в 100%
+
+        // Проходим по строкам (tr) и ячейкам (td, th)
+        Elements rows = tableElement.select("tr");
+        for (int i = 0; i < rows.size(); i++) {
+            Element rowElement = rows.get(i);
+            XWPFTableRow tableRow = (i == 0) ? table.getRow(0) : table.createRow();
+
+            Elements cells = rowElement.select("td, th");
+            for (int j = 0; j < cells.size(); j++) {
+                Element cellElement = cells.get(j);
+                XWPFTableCell tableCell = (j == 0 && i == 0) ? tableRow.getCell(0) : tableRow.addNewTableCell();
+
+                // Удаляем существующие пустые параграфы в ячейке перед добавлением текста
+                for (int k = tableCell.getParagraphs().size() - 1; k >= 0; k--) {
+                    tableCell.removeParagraph(k);
+                }
+
+                XWPFParagraph paragraph = tableCell.addParagraph();
+                XWPFRun run = paragraph.createRun();
+                setupRun(run);
+                run.setText(cellElement.text());
+            }
+        }
+    }
+
+
     private int getPictureType(String mimeType) {
         if (mimeType.contains("jpeg")) {
             return XWPFDocument.PICTURE_TYPE_JPEG;
@@ -372,8 +513,6 @@ public class DocumentGeneratorService {
         }
         return XWPFDocument.PICTURE_TYPE_PICT;
     }
-
-    //=======================new the last
 
 
     private void createRequestSection(XWPFDocument document, List<String> requests) {
@@ -426,5 +565,4 @@ public class DocumentGeneratorService {
             signatoryRun.setText(signatory);
         }
     }
-
 }
