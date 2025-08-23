@@ -1,0 +1,509 @@
+body {
+    background-color: #f4f7f9;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.calculator-container {
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    width: 800px; /* Немного увеличена ширина контейнера для лучшего размещения grid */
+    margin: 20px auto;
+}
+
+h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 25px;
+    font-weight: 600;
+}
+
+/* РЕШЕНИЕ ПРОБЛЕМ: Замена Flexbox на Grid для выравнивания */
+.form-group {
+    display: grid;
+    /* Колонки: [Метка] [Поле ввода/селект] [Доп. элемент (span, кнопка)] */
+    grid-template-columns: 250px minmax(0, 1fr) auto;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 10px;
+}
+
+/* Стили для меток - теперь они всегда в первой колонке */
+.form-group label {
+    color: #555;
+    font-weight: 500;
+    grid-column: 1; /* Явно помещаем в первую колонку */
+}
+
+/* Стили для основных полей ввода и выбора.
+   Они занимают вторую колонку, что обеспечивает одинаковую ширину. */
+.form-group input:not([type="radio"]),
+.form-group select {
+    grid-column: 2; /* Явно помещаем во вторую колонку */
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    width: 100%; /* Заставляем растягиваться на всю ширину колонки */
+    box-sizing: border-box; /* Важно: чтобы padding не влиял на ширину */
+}
+
+/* РЕШЕНИЕ ПРОБЛЕМЫ: Одинаковая длина полей дат */
+.form-group .date-input {
+    /* width: 150px; Убрано, так как ширина теперь контролируется grid */
+    /* Поле займет всю вторую колонку, как и все остальные */
+}
+
+/* РЕШЕНИЕ ПРОБЛЕМЫ: Увеличиваем поле rate-value */
+.form-group .rate-value-input {
+    width: 80px; /* Явно задаем комфортную ширину */
+    text-align: center;
+    /* grid-column и width: 100% отменят друг друга, поэтому задаем ширину явно */
+}
+
+/* Стили для span (например, "%", "₽") и других элементов справа от поля */
+.form-group span {
+    color: #777;
+    grid-column: 3; /* Помещаем в третью колонку */
+    white-space: nowrap; /* Чтобы текст не переносился */
+    padding-left: 5px;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    outline: none;
+}
+
+/* ОСОБЫЙ СЛУЧАЙ: Группа с процентной ставкой требует более сложной разметки Grid */
+/* Если её не трогать, правила выше сломают её вёрстку.
+   Лучше всего обернуть её внутренние элементы в отдельные div'ы и применить grid к ним.
+   Но в рамках CSS можно задать ей особые правила. */
+.rate-group {
+    display: grid;
+    grid-template-columns: 250px minmax(0, 1fr) auto;
+    gap: 10px 12px; /* Разные отступы по вертикали и горизонтали */
+    align-items: center;
+}
+.rate-group > label { grid-row: 1; grid-column: 1; }
+.rate-group > select#rate-type { grid-row: 1; grid-column: 2; }
+.rate-group > input#rate-value { grid-row: 1; grid-column: 3; width: 80px; } /* Помещаем в 3ю колонку и задаем ширину */
+.rate-group > span.percent-symbol { grid-row: 1; grid-column: 4; } /* Добавляем 4ю колонку для символа */
+.rate-group > select#rate-period { grid-row: 2; grid-column: 2 / span 2; } /* Растягиваем на две колонки */
+
+/* ОСОБЫЙ СЛУЧАЙ: Строка с радиокнопками */
+/* Переопределяем grid для этой группы, выравниваем элементы по горизонтали */
+.form-group:last-of-type {
+    display: flex; /* Возвращаем flex для горизонтального расположения */
+    align-items: center;
+    gap: 20px;
+}
+.form-group:last-of-type label {
+    width: auto; /* Сбрасываем ширину */
+    margin-right: 10px;
+    grid-column: auto; /* Сбрасываем grid positioning */
+}
+
+/* Стили для радиокнопок */
+.form-group input[type="radio"] {
+    margin-left: 15px;
+    transform: scale(1.2);
+    cursor: pointer;
+}
+
+/* Стилизация выпадающих списков со стрелкой */
+.colored-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23444' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+    padding-right: 30px;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background-color: #ddd;
+    margin: 30px 0;
+}
+
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.button-group button {
+    flex-grow: 1;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.button-group button i {
+    font-size: 1.1em;
+}
+
+/* Основные кнопки */
+.primary-btn {
+    background-color: #007bff;
+    color: #fff;
+}
+.primary-btn:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+/* Второстепенные кнопки */
+.secondary-btn {
+    color: #fff;
+}
+
+.secondary-btn.clear-btn {
+    background-color: #dc3545;
+}
+.secondary-btn.clear-btn:hover {
+    background-color: #c82333;
+    transform: translateY(-2px);
+}
+
+.secondary-btn.print-btn {
+    background-color: #20c997;
+}
+.secondary-btn.print-btn:hover {
+    background-color: #17a2b8;
+    transform: translateY(-2px);
+}
+
+.secondary-btn.copy-btn {
+    background-color: #6c757d;
+}
+.secondary-btn.copy-btn:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+}
+
+.secondary-btn.export-btn {
+    background-color: #17a2b8;
+}
+.secondary-btn.export-btn:hover {
+    background-color: #138496;
+    transform: translateY(-2px);
+}
+
+.add-payment-btn {
+    background-color: #28a745;
+    color: #fff;
+    width: 40px;
+    flex-grow: 0;
+    font-size: 1.5rem;
+    padding: 0;
+    line-height: 40px;
+}
+
+.add-payment-btn:hover {
+    background-color: #218838;
+}
+
+.results-container {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.results-text p {
+    margin: 10px 0;
+    line-height: 1.6;
+}
+
+.total-amount {
+    color: #e74c3c;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.results-table th,
+.results-table td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.results-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+.total-row {
+    background-color: #fff3cd;
+}
+
+.total-row td {
+    font-weight: bold;
+    border-top: 2px solid #ffc107;
+}
+
+/* Стили для печати */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    .calculator-container,
+    .calculator-container * {
+        visibility: visible;
+    }
+    .calculator-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+    .button-group,
+    .add-payment-btn,
+    .remove-payment-btn {
+        display: none !important;
+    }
+    .results-container {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+    .results-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .results-table th,
+    .results-table td {
+        border: 1px solid #000;
+        padding: 8px;
+        text-align: left;
+    }
+    .formula-explanation {
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-bottom: 15px;
+        background-color: #f9f9f9;
+        break-inside: avoid;
+    }
+}
+
+/* Стилизация радиокнопок */
+.form-group input[type="radio"] {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #4a90e2;
+    border-radius: 50%;
+    outline: none;
+    cursor: pointer;
+    position: relative;
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
+.form-group input[type="radio"]:checked::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    background-color: #4a90e2;
+    border-radius: 50%;
+}
+
+.form-group .inline-label {
+    cursor: pointer;
+    margin-right: 15px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.formula-explanation {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 20px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #2c3e50;
+}
+
+.formula-explanation strong {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: block;
+    font-family: inherit;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 868px) { /* Немного увеличил точку останова для нового размера */
+    .calculator-container {
+        width: 95%;
+        padding: 20px;
+    }
+
+    /* РЕШЕНИЕ ПРОБЛЕМ для мобильных: Переключаем grid на столбец */
+    .form-group {
+        grid-template-columns: 1fr; /* Все элементы в одну колонку */
+        gap: 5px;
+    }
+    .form-group label,
+    .form-group input,
+    .form-group select,
+    .form-group span {
+        grid-column: 1; /* Все элементы идут друг под другом */
+        width: 100%; /* Растягиваем на всю ширину */
+    }
+    .form-group .rate-value-input {
+        width: 100%; /* На мобильных тоже растягиваем */
+    }
+
+    /* Адаптация сложной группы ставки */
+    .rate-group {
+        grid-template-columns: 1fr;
+    }
+    .rate-group > * {
+        grid-column: 1 !important;
+        grid-row: auto !important;
+    }
+
+    .button-group {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .button-group button {
+        flex-grow: 1;
+        width: calc(50% - 10px);
+        margin-bottom: 10px;
+    }
+}
+
+.radio-group {
+    grid-column: 2;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+.radio-container {
+    grid-column: 2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Убедитесь, что стили для радиокнопок применяются правильно */
+.form-group input[type="radio"] {
+    margin: 0; /* Убираем старые отступы */
+    transform: scale(1.1);
+}
+
+.form-group .inline-label {
+    margin: 0; /* Убираем старые отступы */
+    cursor: pointer;
+}
+
+.partial-payment-item {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.partial-payment-item label {
+    margin: 0;
+}
+
+#partial-payment-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+
+/* детализация расчёта*/
+
+.calculation-details {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+    font-size: 14px;
+}
+
+.calculation-details th {
+    background-color: #f5f5f5;
+    padding: 8px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+.calculation-details td {
+    padding: 8px;
+    border: 1px solid #ddd;
+}
+
+.calculation-details .payment-row td {
+    background-color: #f0f8ff;
+    font-style: italic;
+    color: #0066cc;
+}
+
+.formula-explanation {
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.math-formula {
+    font-family: 'Courier New', monospace;
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    border-left: 4px solid #007bff;
+    margin: 10px 0;
+    line-height: 1.8;
+    white-space: pre-wrap;
+}
+
+.calculation-details td {
+    vertical-align: top;
+    padding: 8px;
+    border: 1px solid #ddd;
+}
+
+.calculation-details td:nth-child(5) {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.4;
+}

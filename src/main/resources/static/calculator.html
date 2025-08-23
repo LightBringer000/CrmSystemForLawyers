@@ -1,0 +1,142 @@
+<div>
+    <!DOCTYPE html>
+    <html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Управление стадиями процесса</title>
+        <link rel="stylesheet" type="text/css" href="/css/calculator.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    </head>
+    <body>
+    <div class="calculator-container">
+        <h2>Расчёт задолженности</h2>
+
+        <div class="form-group">
+            <label for="debt-amount">Основная сумма задолженности:</label>
+            <div>
+                <input type="number" id="debt-amount" placeholder="" />
+                <span>рублей</span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="start-period">Начало периода:</label>
+            <input type="date" id="start-period" class="date-input" />
+        </div>
+
+        <div class="form-group">
+            <label for="end-period">Окончание периода:</label>
+            <input type="date" id="end-period" class="date-input" />
+        </div>
+
+        <div class="form-group rate-group">
+            <label for="rate-type">Процентная ставка:</label>
+            <select id="rate-type">
+                <option value="fixed">Договорная ставка</option>
+                <option value="cbr_single">Ключевая ставка ЦБ РФ</option>
+                <option value="cbr_double">Ключевая ставка ЦБ РФ × 2</option>
+            </select>
+            <label for="rate-value"></label><input type="number" id="rate-value" placeholder="%" class="rate-value-input wide-rate-input" />
+            <label for="rate-period"></label><select id="rate-period" class="colored-select rate-period-select">
+                <option value="day">в день</option>
+                <option value="month">в месяц</option>
+                <option value="year">в год</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="max-rate">Максимальный размер процентов:</label>
+            <div>
+                <input type="number" id="max-rate" placeholder="Например, 100" />
+                <span>% от суммы долга</span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Частичные оплаты:</label>
+            <div id="partial-payment-group">
+                <div class="partial-payment-item">
+                    <label>
+                        <input type="date" class="payment-date date-input" />
+                    </label>
+                    <label>
+                        <input type="number" class="payment-amount" placeholder="Сумма (руб.)" />
+                    </label>
+                    <label>
+                        <select class="payment-destination colored-select">
+                            <option value="debt">В счёт долга</option>
+                            <option value="penalty">В счёт неустойки</option>
+                        </select>
+                    </label>
+                    <button class="add-payment-btn"><i class="fas fa-plus"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Методика расчета:</label>
+            <div>
+                <label>
+                    <select class="colored-select">
+                        <option value="calendar-days">По календарным дням</option>
+                    </select>
+                </label>
+                <label>
+                    <select class="colored-select">
+                        <option value="365">Делить на 365 (366)</option>
+                        <option value="100">Делить на 360</option>
+                    </select>
+                </label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Вид расчета:</label>
+            <div class="radio-container">
+                <input type="radio" id="text-view" name="view-type" checked />
+                <label for="text-view" class="inline-label">📝 Текст</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label></label>
+            <div class="radio-container">
+                <input type="radio" id="table-view" name="view-type" />
+                <label for="table-view" class="inline-label">📊 Таблица</label>
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="button-group">
+            <button class="primary-btn"><i class="fas fa-calculator"></i> Рассчитать</button>
+            <button class="secondary-btn clear-btn"><i class="fas fa-trash-alt"></i> Очистить</button>
+            <button class="secondary-btn print-btn"><i class="fas fa-print"></i> Распечатать</button>
+            <button class="secondary-btn copy-btn"><i class="fas fa-copy"></i> Копировать</button>
+            <button class="secondary-btn export-btn"><i class="fas fa-file-word"></i> Экспорт в Word</button>
+        </div>
+    </div>
+
+    <!-- Шаблон для новых строк частичных оплат -->
+    <template id="payment-item-template">
+        <div class="partial-payment-item">
+            <label>
+                <input type="date" class="payment-date date-input" />
+            </label>
+            <label>
+                <input type="number" class="payment-amount" placeholder="Сумма (руб.)" />
+            </label>
+            <label>
+                <select class="payment-destination colored-select">
+                    <option value="debt">В счёт долга</option>
+                    <option value="penalty">В счёт неустойки</option>
+                </select>
+            </label>
+            <button class="remove-payment-btn"><i class="fas fa-minus"></i></button>
+        </div>
+    </template>
+    </body>
+    </html>
+</div>
