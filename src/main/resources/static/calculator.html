@@ -91,6 +91,21 @@
                 </label>
             </div>
         </div>
+        <div class="form-group">
+            <label>Учет дней расчета:</label>
+            <div class="radio-container">
+                <input type="radio" id="include-start-exclude-end" name="days-calculation" value="includeStartExcludeEnd" checked />
+                <label for="include-start-exclude-end" class="inline-label">Включая начальный, исключая конечный</label>
+            </div>
+            <div class="radio-container">
+                <input type="radio" id="include-both-days" name="days-calculation" value="includeBothDays" />
+                <label for="include-both-days" class="inline-label">Включая оба дня</label>
+            </div>
+            <div class="radio-container">
+                <input type="radio" id="exclude-both-days" name="days-calculation" value="excludeBothDays" />
+                <label for="exclude-both-days" class="inline-label">Исключая оба дня</label>
+            </div>
+        </div>
 
         <div class="form-group">
             <label>Вид расчета:</label>
