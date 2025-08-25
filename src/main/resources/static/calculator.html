@@ -38,8 +38,10 @@
                 <option value="cbr_single">Ключевая ставка ЦБ РФ</option>
                 <option value="cbr_double">Ключевая ставка ЦБ РФ × 2</option>
             </select>
-            <label for="rate-value"></label><input type="number" id="rate-value" placeholder="%" class="rate-value-input wide-rate-input" />
-            <label for="rate-period"></label><select id="rate-period" class="colored-select rate-period-select">
+            <label for="rate-value"></label>
+            <input type="number" id="rate-value" step="0.01" min="0" placeholder="%" class="rate-value-input wide-rate-input" />
+            <label for="rate-period"></label>
+            <select id="rate-period" class="colored-select rate-period-select">
                 <option value="day">в день</option>
                 <option value="month">в месяц</option>
                 <option value="year">в год</option>
