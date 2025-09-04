@@ -507,3 +507,184 @@ hr {
     font-size: 12px;
     line-height: 1.4;
 }
+
+
+
+
+
+
+.calculation-details-list {
+    list-style: none;
+    padding: 0;
+    margin: 15px 0;
+}
+
+.calculation-stage {
+    background: #f8f9fa;
+    border-left: 4px solid #007bff;
+    margin-bottom: 10px;
+    padding: 12px;
+    border-radius: 4px;
+}
+
+.stage-main-info {
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.stage-interest {
+    color: #28a745;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.stage-formula {
+    background: #e9ecef;
+    padding: 8px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+
+.stage-payment {
+    color: #dc3545;
+    font-weight: 500;
+    margin-top: 5px;
+}
+
+
+
+/* key rate  */
+.cbr-rate-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+}
+
+.cbr-rate-table th, .cbr-rate-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.cbr-rate-table th {
+    background-color: #f2f2f2;
+}
+
+.cbr-rate-table .total-row {
+    font-weight: bold;
+    background-color: #e8f4f8;
+}
+
+
+
+
+.cbr-detailed-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+    font-size: 14px;
+}
+
+.cbr-detailed-table th, .cbr-detailed-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+.cbr-detailed-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+.cbr-detailed-table .cbr-total-row {
+    background-color: #e8f4f8;
+    font-weight: bold;
+}
+
+.cbr-detailed-table tr:hover {
+    background-color: #f5f5f5;
+}
+
+/*  css для строки уменьшения поступивших платежей во время расчётного период по ключевой ставке ЦБ РФ и ЦБ РФ * 2  */
+.calculation-details {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+    font-size: 14px;
+}
+
+.calculation-details th,
+.calculation-details td {
+    padding: 8px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.calculation-details th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+}
+
+.calculation-details .payment-row {
+    background-color: #fff3cd;
+}
+
+.calculation-details .payment-row td {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.calculation-details tr:hover {
+    background-color: #f8f9fa;
+}
+
+.total-amount {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #dc3545;
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-left: 4px solid #dc3545;
+}
+
+
+
+/*  02.09 */
+
+.cbr-detailed-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+}
+
+.cbr-detailed-table th, .cbr-detailed-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.cbr-detailed-table th {
+    background-color: #f2f2f2;
+}
+
+.payment-row {
+    background-color: #e8f5e8;
+    font-weight: bold;
+}
+
+.cbr-total-row {
+    background-color: #f0f0f0;
+    font-weight: bold;
+}
+
+.payment-info {
+    background-color: #f9f9f9;
+    padding: 10px;
+    border-radius: 5px;
+    border-left: 4px solid #4CAF50;
+}
+
+
