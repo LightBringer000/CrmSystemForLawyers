@@ -1194,10 +1194,6 @@ function addMonths(date, months) {
     return result;
 }
 
-function getDaysInMonth(date) {
-    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-}
-
 //Функция для расчёта процентов, исходя из годовой ставки
 function calculateYearlyInterest(principal, rateValue, startDate, endDate, daysMethod) {
     const yearlyRate = rateValue / 100;
@@ -3102,6 +3098,122 @@ function getCBRRatesForPeriodWithDetails(startDate, endDate) {
     return rates;
 }
 
+//function createMonthlyDetailedResults(data) {
+//    const monthlyRate = data.interestRateValue / 100;
+//    let html = `<h3>Детализация расчета месячных процентов:</h3>`;
+//
+//    // Добавляем информацию о частичных платежах
+//    if (data.calculationStages && data.calculationStages.length > 0) {
+//        const paymentStages = data.calculationStages.filter(stage => stage.daysMethod === 'payment');
+//        if (paymentStages.length > 0) {
+//            html += `<div class="payment-info" style="margin-bottom: 15px;">`;
+//            html += `<strong>Частичные платежи:</strong><br>`;
+//            paymentStages.forEach(stage => {
+//                const paymentType = stage.payment.destination === 'debt' ? 'в счет долга' : 'в счет неустойки';
+//                html += `- ${stage.startDate}: ${stage.payment.amount.toFixed(2)} руб. (${paymentType})<br>`;
+//            });
+//            html += `</div>`;
+//        }
+//    }
+//
+//    html += `<table class="monthly-detailed-table" style="width: 100%; border-collapse: collapse; margin: 15px 0;">`;
+//    html += `<tr style="background-color: #f5f5f5;">
+//        <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Период</th>
+//        <th style="padding: 8px; border: 1px solid #ddd; text-align: center;">Дней</th>
+//        <th style="padding: 8px; border: 1px solid #ddd; text-align: center;">Ставка</th>
+//        <th style="padding: 8px; border: 1px solid #ddd; text-align: right;">Сумма долга</th>
+//        <th style="padding: 8px; border: 1px solid #ddd; text-align: right;">Начислено</th>
+//        <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Формула расчета</th>
+//    </tr>`;
+//
+//    let totalInterest = 0;
+//    let totalDays = 0;
+//    let currentPrincipal = data.debtAmount;
+//
+//    // Создаем детализированные месячные периоды
+//    const monthlyPeriods = generateMonthlyPeriods(
+//        new Date(data.startDate),
+//        new Date(data.endDate),
+//        data.calculationStages
+//    );
+//
+//    // Обрабатываем каждый месячный период
+//    monthlyPeriods.forEach((period, index) => {
+//        // ИСПРАВЛЕНИЕ: используем days из периода, а не неопределенную переменную
+//        const daysInPeriod = period.days; // ← ВОТ ИСПРАВЛЕНИЕ
+//
+//        const periodType = period.isFullMonth ? 'Полный месяц' : 'Часть месяца';
+//
+//        // Расчет процентов для периода
+//        let periodInterest;
+//        let formula;
+//
+////        if (period.isFullMonth) {
+////            periodInterest = currentPrincipal * monthlyRate;
+////            formula = `${currentPrincipal.toFixed(2)} × ${data.interestRateValue}%`;
+////        } else {
+////            const daysInCurrentMonth = getDaysInMonth(new Date(period.startDate));
+////            periodInterest = currentPrincipal * monthlyRate * (daysInPeriod / daysInCurrentMonth);
+////            formula = `${currentPrincipal.toFixed(2)} × ${data.interestRateValue}% × ${daysInPeriod} / ${daysInCurrentMonth}`;
+////        }
+//
+//          if (period.isFullMonth) {
+//          // ПОЛНЫЙ МЕСЯЦ: применяем полную месячную ставку
+//              periodInterest = currentPrincipal * monthlyRate;
+//              formula = `${currentPrincipal.toFixed(2)} × ${data.interestRateValue}%`;
+//          } else {
+//          // ЧАСТИЧНЫЙ МЕСЯЦ: пропорциональный расчет
+//              const daysInCurrentMonth = getDaysInMonth(new Date(period.startDate));
+//              periodInterest = currentPrincipal * monthlyRate * (period.days / daysInCurrentMonth);
+//              formula = `${currentPrincipal.toFixed(2)} × ${data.interestRateValue}% × ${period.days} / ${daysInCurrentMonth}`;
+//}
+//
+//        totalInterest += periodInterest;
+//        totalDays += daysInPeriod;
+//
+//        html += `<tr>
+//            <td style="padding: 8px; border: 1px solid #ddd;">${period.startDate} - ${period.endDate}</td>
+//            <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${daysInPeriod}</td>
+//            <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${data.interestRateValue}% (${periodType})</td>
+//            <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${currentPrincipal.toFixed(2)}</td>
+//            <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${periodInterest.toFixed(2)}</td>
+//            <td style="padding: 8px; border: 1px solid #ddd;">${formula} = ${periodInterest.toFixed(2)} руб.</td>
+//        </tr>`;
+//
+//        // Обновляем текущую сумму долга если были платежи в этом периоде
+//        const paymentsInPeriod = period.payments || [];
+//        paymentsInPeriod.forEach(payment => {
+//            if (payment.destination === 'debt') {
+//                currentPrincipal = Math.max(0, currentPrincipal - payment.amount);
+//
+//                html += `<tr style="background-color: #fffde7;">
+//                    <td style="padding: 8px; border: 1px solid #ddd;">${payment.date}</td>
+//                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">-</td>
+//                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">Платеж</td>
+//                    <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">→ ${currentPrincipal.toFixed(2)}</td>
+//                    <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">-${payment.amount.toFixed(2)}</td>
+//                    <td style="padding: 8px; border: 1px solid #ddd;">Погашение долга</td>
+//                </tr>`;
+//            }
+//        });
+//    });
+//
+//    html += `<tr style="background-color: #e8f5e8; font-weight: bold;">
+//        <td style="padding: 8px; border: 1px solid #ddd;">Итого дней: ${totalDays}</td>
+//        <td colspan="3" style="padding: 8px; border: 1px solid #ddd; text-align: right;">Общая сумма начислений:</td>
+//        <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${totalInterest.toFixed(2)} руб.</td>
+//        <td style="padding: 8px; border: 1px solid #ddd;"></td>
+//    </tr>`;
+//    html += `</table>`;
+//
+//    html += `<div class="formula-note" style="margin-top: 10px; font-style: italic;">
+//        <strong>Формула для каждого периода:</strong> Сумма долга × Месячная ставка × Дни в периоде / Дней в месяце
+//    </div>`;
+//
+//    return html;
+//}
+
+
 function createMonthlyDetailedResults(data) {
     const monthlyRate = data.interestRateValue / 100;
     let html = `<h3>Детализация расчета месячных процентов:</h3>`;
@@ -3138,57 +3250,73 @@ function createMonthlyDetailedResults(data) {
     const monthlyPeriods = generateMonthlyPeriods(
         new Date(data.startDate),
         new Date(data.endDate),
-        data.calculationStages
+        data.calculationStages,
+        data.daysMethod
     );
 
-    // Обрабатываем каждый месячный период
+    // Обрабатываем каждый период
     monthlyPeriods.forEach((period, index) => {
-        // ИСПРАВЛЕНИЕ: используем days из периода, а не неопределенную переменную
-        const daysInPeriod = period.days; // ← ВОТ ИСПРАВЛЕНИЕ
+        let periodInterest = 0;
+        let formula = '';
+        let daysDisplay = 0;
+        let periodType = '';
 
-        const periodType = period.isFullMonth ? 'Полный месяц' : 'Часть месяца';
+        if (period.isPayment) {
+            // Обработка платежа
+            const payment = period.payments[0];
+            if (payment.destination === 'debt') {
+                const debtBeforePayment = currentPrincipal;
+                currentPrincipal = Math.max(0, currentPrincipal - payment.amount);
 
-        // Расчет процентов для периода
-        let periodInterest;
-        let formula;
+                html += `<tr style="background-color: #fffde7;">
+                    <td style="padding: 8px; border: 1px solid #ddd;">${period.startDate}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">-</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">Платеж</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${debtBeforePayment.toFixed(2)} → ${currentPrincipal.toFixed(2)}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">-${payment.amount.toFixed(2)}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">Погашение долга</td>
+                </tr>`;
+            } else if (payment.destination === 'penalty') {
+                html += `<tr style="background-color: #fff0f0;">
+                    <td style="padding: 8px; border: 1px solid #ddd;">${period.startDate}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">-</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">Платеж</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${currentPrincipal.toFixed(2)}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">-${payment.amount.toFixed(2)}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">Погашение неустойки</td>
+                </tr>`;
+            }
+            return; // Пропускаем расчет процентов для платежа
+        }
 
+        // Расчет процентов для обычного периода
         if (period.isFullMonth) {
+            // ПОЛНЫЙ МЕСЯЦ: применяем полную месячную ставку
             periodInterest = currentPrincipal * monthlyRate;
+            const daysInMonth = getDaysInMonth(new Date(period.startDate));
+            daysDisplay = daysInMonth;
+            periodType = 'Полный месяц';
             formula = `${currentPrincipal.toFixed(2)} × ${data.interestRateValue}%`;
         } else {
+            // ЧАСТИЧНЫЙ МЕСЯЦ: пропорциональный расчет
             const daysInCurrentMonth = getDaysInMonth(new Date(period.startDate));
-            periodInterest = currentPrincipal * monthlyRate * (daysInPeriod / daysInCurrentMonth);
-            formula = `${currentPrincipal.toFixed(2)} × ${data.interestRateValue}% × ${daysInPeriod} / ${daysInCurrentMonth}`;
+            periodInterest = currentPrincipal * monthlyRate * (period.days / daysInCurrentMonth);
+            daysDisplay = period.days;
+            periodType = 'Часть месяца';
+            formula = `${currentPrincipal.toFixed(2)} × ${data.interestRateValue}% × ${period.days} / ${daysInCurrentMonth}`;
         }
 
         totalInterest += periodInterest;
-        totalDays += daysInPeriod;
+        totalDays += daysDisplay;
 
         html += `<tr>
             <td style="padding: 8px; border: 1px solid #ddd;">${period.startDate} - ${period.endDate}</td>
-            <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${daysInPeriod}</td>
+            <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${daysDisplay}</td>
             <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${data.interestRateValue}% (${periodType})</td>
             <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${currentPrincipal.toFixed(2)}</td>
             <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${periodInterest.toFixed(2)}</td>
             <td style="padding: 8px; border: 1px solid #ddd;">${formula} = ${periodInterest.toFixed(2)} руб.</td>
         </tr>`;
-
-        // Обновляем текущую сумму долга если были платежи в этом периоде
-        const paymentsInPeriod = period.payments || [];
-        paymentsInPeriod.forEach(payment => {
-            if (payment.destination === 'debt') {
-                currentPrincipal = Math.max(0, currentPrincipal - payment.amount);
-
-                html += `<tr style="background-color: #fffde7;">
-                    <td style="padding: 8px; border: 1px solid #ddd;">${payment.date}</td>
-                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">-</td>
-                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">Платеж</td>
-                    <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">→ ${currentPrincipal.toFixed(2)}</td>
-                    <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">-${payment.amount.toFixed(2)}</td>
-                    <td style="padding: 8px; border: 1px solid #ddd;">Погашение долга</td>
-                </tr>`;
-            }
-        });
     });
 
     html += `<tr style="background-color: #e8f5e8; font-weight: bold;">
@@ -3200,11 +3328,15 @@ function createMonthlyDetailedResults(data) {
     html += `</table>`;
 
     html += `<div class="formula-note" style="margin-top: 10px; font-style: italic;">
-        <strong>Формула для каждого периода:</strong> Сумма долга × Месячная ставка × Дни в периоде / Дней в месяце
+        <strong>Формула для каждого периода:</strong><br>
+        - Полный месяц: Сумма долга × Месячная ставка<br>
+        - Часть месяца: Сумма долга × Месячная ставка × Дни в периоде / Дней в месяце<br>
+        - Проценты начисляются по день платежа включительно
     </div>`;
 
     return html;
 }
+
 
 function generateMonthlyPeriods(startDate, endDate, calculationStages, overallDaysMethod = 'includeStartExcludeEnd') {
     const periods = [];
@@ -3212,43 +3344,36 @@ function generateMonthlyPeriods(startDate, endDate, calculationStages, overallDa
     const end = new Date(endDate);
 
     while (currentDate <= end) {
-        // Определяем конец месячного периода с помощью единообразной функции
         let periodEnd = calculateMonthlyPeriodEnd(currentDate);
-
-        // Не превышаем конечную дату расчета
         const actualEnd = periodEnd > end ? new Date(end) : periodEnd;
 
-        // Используем ТОТ ЖЕ метод расчета дней, что и в основном расчете!
-        const daysInPeriod = calculateDaysBetween(currentDate, actualEnd, overallDaysMethod);
+        // Получаем платежи для этого периода
+        const paymentsInPeriod = getPaymentsInPeriod(currentDate, actualEnd, calculationStages);
 
-        if (daysInPeriod <= 0) {
-            currentDate = new Date(actualEnd);
-            // Важно: используем тот же логический шаг, что и в основном алгоритме
-            if (overallDaysMethod === 'excludeStartIncludeEnd') {
-                currentDate.setDate(currentDate.getDate() + 0); // Остаемся на том же дне
-            } else {
-                currentDate.setDate(currentDate.getDate() + 1);
+        // Если есть платежи, разбиваем период
+        if (paymentsInPeriod.length > 0) {
+            const subPeriods = splitPeriodByPayments(currentDate, actualEnd, paymentsInPeriod, overallDaysMethod);
+            periods.push(...subPeriods);
+        } else {
+            // Без платежей - добавляем целый период
+            const daysInPeriod = calculateDaysBetween(currentDate, actualEnd, overallDaysMethod);
+            if (daysInPeriod > 0) {
+                periods.push({
+                    startDate: formatDateToYYYYMMDD(currentDate),
+                    endDate: formatDateToYYYYMMDD(actualEnd),
+                    days: daysInPeriod,
+                    payments: [],
+                    isFullMonth: isPeriodFullMonth(currentDate, actualEnd)
+                });
             }
-            continue;
         }
 
-        // Определяем, является ли период полным месяцем
-        const isFullMonth = isPeriodFullMonth(currentDate, actualEnd);
-
-        periods.push({
-            startDate: currentDate.toISOString().split('T')[0],
-            endDate: actualEnd.toISOString().split('T')[0],
-            days: daysInPeriod,
-            payments: getPaymentsInPeriod(currentDate, actualEnd, calculationStages),
-            isFullMonth: isFullMonth
-        });
-
-        // Единообразный переход к следующему периоду в зависимости от метода
+        // Переход к следующему периоду
         if (overallDaysMethod === 'excludeStartIncludeEnd') {
-            currentDate = new Date(actualEnd); // Следующий период начинается С конечной даты
+            currentDate = new Date(actualEnd);
         } else {
             currentDate = new Date(actualEnd);
-            currentDate.setDate(currentDate.getDate() + 1); // Следующий период начинается ПОСЛЕ конечной даты
+            currentDate.setDate(currentDate.getDate() + 1);
         }
     }
 
@@ -3266,33 +3391,20 @@ function calculateMonthlyPeriodEnd(startDate) {
 function isPeriodFullMonth(startDate, endDate) {
     const start = new Date(startDate);
     const end = new Date(endDate);
-    const startDay = start.getDate();
 
-    // 1. Если период начинается с 1 числа
-    if (startDay === 1) {
-        const lastDayOfMonth = new Date(start.getFullYear(), start.getMonth() + 1, 0);
-        return end.getTime() === lastDayOfMonth.getTime();
+    // Проверяем, что период начинается с 1 числа месяца
+    if (start.getDate() !== 1) {
+        return false;
     }
 
-    // 2. Если период начинается не с 1 числа
-    const nextMonth = start.getMonth() + 1;
-    const nextYear = start.getFullYear();
+    // Проверяем, что период заканчивается последним днем месяца
+    const lastDayOfMonth = new Date(end.getFullYear(), end.getMonth() + 1, 0);
 
-    // Вычисляем ожидаемый конец периода по правилам
-    let expectedEnd;
+    // Сравниваем даты без времени
+    const endDateOnly = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+    const lastDayOnly = new Date(lastDayOfMonth.getFullYear(), lastDayOfMonth.getMonth(), lastDayOfMonth.getDate());
 
-    // Проверяем, существует ли (startDay - 1) в следующем месяце
-    const daysInNextMonth = new Date(nextYear, nextMonth + 1, 0).getDate();
-    const targetDay = startDay - 1;
-
-    if (targetDay <= daysInNextMonth) {
-        expectedEnd = new Date(nextYear, nextMonth, targetDay);
-    } else {
-        // Если такого числа нет, берем последний день следующего месяца
-        expectedEnd = new Date(nextYear, nextMonth + 1, 0);
-    }
-
-    return end.getTime() === expectedEnd.getTime();
+    return endDateOnly.getTime() === lastDayOnly.getTime();
 }
 
 function getDaysInMonth(date) {
@@ -3329,6 +3441,19 @@ function calculateDaysBetweenMonthPeriod(startDate, endDate) {
     return Math.round(diffTime / (1000 * 60 * 60 * 24));
 }
 
+//Функция расчёта процентов при частичном погашении долга в течение месячного периода
+function calculateInclusiveDaysBetween(startDate, endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Приводим даты к UTC для избежания проблем с часовыми поясами
+    const startUTC = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate());
+    const endUTC = Date.UTC(end.getFullYear(), end.getMonth(), end.getDate());
+
+    // Разница в днях + 1 (включая оба дня)
+    return Math.floor((endUTC - startUTC) / (1000 * 60 * 60 * 24)) + 1;
+}
+
 function calculateInterestByPeriods(startDate, endDate, principal, monthlyRate, calculationStages, startDay) {
     const isFullMonth = isPeriodFullMonth(startDate, endDate, startDay);
     const daysInPeriod = calculateDaysBetween(startDate, endDate);
@@ -3355,6 +3480,85 @@ function calculateInterestByPeriods(startDate, endDate, principal, monthlyRate, 
         interest: interestForPeriod,
         newPrincipal: currentPrincipal
     };
+}
+
+function splitPeriodByPayments(startDate, endDate, payments, overallDaysMethod) {
+    const periods = [];
+    let currentDate = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Сортируем платежи по дате
+    const sortedPayments = payments
+        .filter(payment => {
+            const paymentDate = new Date(payment.date);
+            return paymentDate >= currentDate && paymentDate <= end;
+        })
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    let paymentIndex = 0;
+
+    while (currentDate <= end && paymentIndex < sortedPayments.length) {
+        const payment = sortedPayments[paymentIndex];
+        const paymentDate = new Date(payment.date);
+
+        // Период ДО платежа (включая день платежа)
+        if (paymentDate > currentDate) {
+            const periodEnd = new Date(paymentDate);
+            //const daysBeforePayment = calculateDaysBetween(currentDate, periodEnd, 'includeStartIncludeEnd');
+            const daysBeforePayment = calculateInclusiveDaysBetween(currentDate, periodEnd);
+
+            if (daysBeforePayment > 0) {
+                periods.push({
+                    startDate: formatDateToYYYYMMDD(currentDate),
+                    endDate: formatDateToYYYYMMDD(periodEnd),
+                    days: daysBeforePayment,
+                    isFullMonth: false,
+                    payments: []
+                });
+            }
+
+            currentDate = new Date(periodEnd);
+        }
+
+        // Добавляем сам платеж как отдельный "период"
+        periods.push({
+            startDate: formatDateToYYYYMMDD(paymentDate),
+            endDate: formatDateToYYYYMMDD(paymentDate),
+            days: 0,
+            isFullMonth: false,
+            payments: [payment],
+            isPayment: true
+        });
+
+        // Переходим к следующему дню после платежа
+        currentDate = new Date(paymentDate);
+        currentDate.setDate(currentDate.getDate() + 1);
+        paymentIndex++;
+    }
+
+    // Добавляем оставшийся период после всех платежей
+    if (currentDate <= end) {
+        const remainingDays = calculateDaysBetween(currentDate, end, overallDaysMethod);
+        if (remainingDays > 0) {
+            periods.push({
+                startDate: formatDateToYYYYMMDD(currentDate),
+                endDate: formatDateToYYYYMMDD(end),
+                days: remainingDays,
+                isFullMonth: isPeriodFullMonth(currentDate, end),
+                payments: []
+            });
+        }
+    }
+
+    return periods;
+}
+
+function formatDateToYYYYMMDD(date) {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
 
 
@@ -3558,5 +3762,55 @@ function initCalculator() {
         }
     }, 2000);
 }
+
+// ================== Тесты ==================
+
+function testFullMonthDetection() {
+    const testCases = [
+        ['2023-11-01', '2023-11-30', true],
+        ['2023-12-01', '2023-12-31', true],
+        ['2024-02-01', '2024-02-29', true]
+    ];
+
+    testCases.forEach(([startStr, endStr, expected]) => {
+        const start = new Date(startStr);
+        const end = new Date(endStr);
+
+        const lastDayOfMonth = new Date(start.getFullYear(), start.getMonth() + 1, 0);
+        const endDateOnly = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+        const lastDayOnly = new Date(lastDayOfMonth.getFullYear(), lastDayOfMonth.getMonth(), lastDayOfMonth.getDate());
+
+        console.log(`Testing: ${startStr} - ${endStr}`);
+        console.log(`Start day: ${start.getDate()}, End: ${endDateOnly.toISOString().split('T')[0]}, Last day: ${lastDayOnly.toISOString().split('T')[0]}`);
+        console.log(`Comparison: ${endDateOnly.getTime()} === ${lastDayOnly.getTime()} -> ${endDateOnly.getTime() === lastDayOnly.getTime()}`);
+
+        const result = isPeriodFullMonth(start, end);
+        console.log(`Result: ${result}, Expected: ${expected}, ${result === expected ? '✓' : '✗'}`);
+        console.log('---');
+    });
+}
+
+function debugDaysCalculation() {
+    const periods = [
+        ['2023-11-01', '2023-11-30'],
+        ['2023-12-01', '2023-12-31'],
+        ['2024-02-01', '2024-02-29']
+    ];
+
+    periods.forEach(([startStr, endStr]) => {
+        const start = new Date(startStr);
+        const end = new Date(endStr);
+        const days = calculateDaysBetween(start, end, 'includeStartExcludeEnd');
+
+        console.log(`${startStr} - ${endStr}: ${days} дней`);
+
+        // Правильное количество дней для полного месяца
+        const lastDay = new Date(start.getFullYear(), start.getMonth() + 1, 0);
+        const expectedDays = lastDay.getDate(); // Должно быть 30, 31, 29 и т.д.
+
+        console.log(`Ожидалось: ${expectedDays} дней, Разница: ${days - expectedDays}`);
+    });
+}
+
 // Запуск инициализации
 initCalculator();
