@@ -1705,12 +1705,6 @@ processViewObserver.observe(document.body, {
     subtree: true
 });
 
-// Интеграция с Vaadin Flow
-//if (window.Vaadin?.Flow?.clients?.ROOT) {
-//    window.Vaadin.Flow.clients.ROOT.submitToServer = function(formData) {
-//        handleProcessFormSubmit(new Event('submit'));
-//        return false;
-//    };
-//}
+
 
 

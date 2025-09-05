@@ -224,34 +224,81 @@ function setupCalculatorEventHandlers(elements) {
     setupNumberValidation();
 }
 
+//function setupDOMObservers() {
+//    // Очищаем старых наблюдателей
+//    domObservers.forEach(observer => observer.disconnect());
+//    domObservers.length = 0;
+//
+//    // Наблюдатель за изменениями в DOM
+//    const mainObserver = new MutationObserver((mutations) => {
+//        // Проверяем, не удалились ли важные элементы
+//        const calculatorContainer = document.querySelector('.calculator-container');
+//        if (!calculatorContainer) {
+//            console.log('Calculator container removed, reinitializing...');
+//            calculatorInitialized = false;
+//            initializeCalculator();
+//            return;
+//        }
+//
+//        // Проверяем, не добавились ли новые элементы, которые нам нужны
+//        const missingElements = findCalculatorElements();
+//        if (!missingElements && !calculatorInitialized) {
+//            initializeCalculator();
+//        }
+//    });
+//
+//    mainObserver.observe(document.body, {
+//        childList: true,
+//        subtree: true
+//    });
+//    domObservers.push(mainObserver);
+//}
+
 function setupDOMObservers() {
-    // Очищаем старых наблюдателей
+    // 1. Очищаем старых наблюдателей
     domObservers.forEach(observer => observer.disconnect());
     domObservers.length = 0;
 
-    // Наблюдатель за изменениями в DOM
-    const mainObserver = new MutationObserver((mutations) => {
-        // Проверяем, не удалились ли важные элементы
+    // 2. Создаем MutationObserver для отслеживания изменений в DOM
+    const mainObserver = new MutationObserver((mutations, observer) => {
+        // Проверяем, существует ли главный элемент калькулятора
         const calculatorContainer = document.querySelector('.calculator-container');
-        if (!calculatorContainer) {
-            console.log('Calculator container removed, reinitializing...');
-            calculatorInitialized = false;
+
+        // Если контейнер калькулятора найден И калькулятор не инициализирован
+        if (calculatorContainer && !calculatorInitialized) {
+            console.log('Контейнер калькулятора обнаружен. Запускаем инициализацию...');
             initializeCalculator();
             return;
         }
 
-        // Проверяем, не добавились ли новые элементы, которые нам нужны
-        const missingElements = findCalculatorElements();
-        if (!missingElements && !calculatorInitialized) {
-            initializeCalculator();
+        // Если контейнер не найден (был удален) И калькулятор был инициализирован
+        if (!calculatorContainer && calculatorInitialized) {
+            console.log('Контейнер калькулятора удален. Сбрасываем флаг инициализации.');
+            calculatorInitialized = false;
+            return;
+        }
+
+        // Если контейнер найден, но элементы не работают (повторная инициализация)
+        if (calculatorContainer && calculatorInitialized) {
+            // Проверяем, работают ли обработчики событий
+            const calculateBtn = document.querySelector('.primary-btn');
+            if (calculateBtn && !calculateBtn._hasEventListeners) {
+                console.log('Элементы калькулятора найдены, но обработчики не работают. Переинициализируем...');
+                calculatorInitialized = false;
+                initializeCalculator();
+            }
         }
     });
 
+    // 3. Настраиваем наблюдатель для отслеживания изменений в body
     mainObserver.observe(document.body, {
         childList: true,
         subtree: true
     });
+
+    // 4. Добавляем наблюдатель в массив для последующей очистки
     domObservers.push(mainObserver);
+    console.log('MutationObserver для калькулятора настроен.');
 }
 
 // ================== Вспомогательные функции ==================
@@ -2813,80 +2860,6 @@ function createDetailedCalculationTable(data, rateValue) {
 
 // ================== Отображение результатов ==================
 
-//function showResults(data) {
-//    console.log('=== DEBUG: showResults ===');
-//
-//    let container = document.querySelector('.results-container');
-//    if (!container) {
-//        container = document.createElement('div');
-//        container.className = 'results-container';
-//        const calculatorContainer = document.querySelector('.calculator-container');
-//        if (calculatorContainer) {
-//            calculatorContainer.appendChild(container);
-//        } else {
-//            document.body.appendChild(container);
-//        }
-//    }
-//
-//    let htmlContent = `<h2>Расчёт задолженности:</h2>`;
-//    htmlContent += `<p><strong>Начальная сумма:</strong> ${data.debtAmount.toFixed(2)} руб.</p>`;
-//    htmlContent += `<p><strong>Период расчета:</strong> с ${data.startDate} по ${data.endDate} (${data.days} ${getDaysWord(data.days)})</p>`;
-//    htmlContent += `<p><strong>Процентная ставка:</strong> ${data.interestRate}</p>`;
-//    htmlContent += `<p><strong>Метод расчета дней:</strong> ${getDaysMethodDescription(data.daysMethod)}</p>`;
-//
-//    if (data.maxRate) {
-//        htmlContent += `<p><strong>Применено ограничение по максимальной ставке:</strong> ${data.maxRate}%</p>`;
-//    }
-//
-//    // РАЗДЕЛЬНОЕ ОТОБРАЖЕНИЕ ДЛЯ КЛЮЧЕВОЙ СТАВКИ И ДОГОВОРНЫХ ПРОЦЕНТОВ
-//    if (data.interestRateType.startsWith('cbr') && data.cbrRatesUsed && data.cbrRatesUsed.length > 0) {
-//        // Детализация для ключевой ставки ЦБ
-//        htmlContent += createCBRDetailedResults(data);
-//    } else if (data.calculationStages && data.calculationStages.length > 0) {
-//        // Детализация для договорных процентов (старая логика)
-//        htmlContent += `<h3>Детализация расчета:</h3>`;
-//        htmlContent += `<ul class="calculation-details-list">`;
-//
-//        data.calculationStages.forEach(stage => {
-//            let formula = generateStageFormula(stage, data);
-//            htmlContent += `<li class="calculation-stage">`;
-//
-//            if (stage.daysMethod === 'payment') {
-//                htmlContent += `<div class="stage-main-info"><strong>${stage.startDate}</strong>: ${stage.description}</div>`;
-//                if (stage.payment) {
-//                    htmlContent += `<div class="stage-payment">Платеж: ${stage.payment.amount.toFixed(2)} руб. (${stage.payment.destination === 'debt' ? 'в счет долга' : 'в счет неустойки'})</div>`;
-//                }
-//            } else {
-//                const methodDesc = getDaysMethodDescription(stage.daysMethod);
-//                htmlContent += `<div class="stage-main-info"><strong>${stage.startDate} - ${stage.endDate}</strong>: ${stage.description}</div>`;
-//
-//                if (stage.interest !== undefined && stage.interest > 0) {
-//                    htmlContent += `<div class="stage-interest">Проценты: ${stage.interest.toFixed(2)} руб.</div>`;
-//                    if (formula) {
-//                        htmlContent += `<div class="stage-formula">${formula}</div>`;
-//                    }
-//                }
-//            }
-//
-//            htmlContent += `</li>`;
-//        });
-//
-//        htmlContent += `</ul>`;
-//    }
-//
-//    htmlContent += `<h3>Итого:</h3>`;
-//    htmlContent += `<p><strong>Остаток основного долга:</strong> ${data.remainingDebt.toFixed(2)} руб.</p>`;
-//    htmlContent += `<p><strong>Сумма начисленных ${data.interestRateType.startsWith('cbr') ? 'неустойки' : 'процентов'}:</strong> ${data.interest.toFixed(2)} руб.</p>`;
-//
-//    if (data.totalPayments > 0) {
-//        htmlContent += `<p><strong>Общая сумма платежей:</strong> ${data.totalPayments.toFixed(2)} руб. (${data.debtPayments.toFixed(2)} в счет долга, ${data.penaltyPayments.toFixed(2)} в счет неустойки)</p>`;
-//    }
-//
-//    htmlContent += `<p class="total-amount"><strong>К оплате:</strong> ${data.amountToPay.toFixed(2)} руб.</p>`;
-//
-//    container.innerHTML = htmlContent;
-//}
-
 function showResults(data) {
     console.log('=== DEBUG: showResults ===');
 
@@ -2902,6 +2875,11 @@ function showResults(data) {
         }
     }
 
+    // Определяем выбранный формат отображения
+    const textViewRadio = document.getElementById('text-view');
+    const tableViewRadio = document.getElementById('table-view');
+    const useTableView = tableViewRadio ? tableViewRadio.checked : false;
+
     let htmlContent = `<h2>Расчёт задолженности:</h2>`;
     htmlContent += `<p><strong>Начальная сумма:</strong> ${data.debtAmount.toFixed(2)} руб.</p>`;
     htmlContent += `<p><strong>Период расчета:</strong> с ${data.startDate} по ${data.endDate} (${data.days} ${getDaysWord(data.days)})</p>`;
@@ -2912,53 +2890,36 @@ function showResults(data) {
         htmlContent += `<p><strong>Применено ограничение по максимальной ставке:</strong> ${data.maxRate}%</p>`;
     }
 
-    // РАЗДЕЛЬНОЕ ОТОБРАЖЕНИЕ ДЛЯ КЛЮЧЕВОЙ СТАВКИ И ДОГОВОРНЫХ ПРОЦЕНТОВ
-//    if (data.interestRateType.startsWith('cbr') && data.cbrRatesUsed && data.cbrRatesUsed.length > 0) {
-//        // Детализация для ключевой ставки ЦБ
-//        htmlContent += createCBRDetailedResults(data);
-//    } else if (data.calculationStages && data.calculationStages.length > 0) {
-//        // Детализация для договорных процентов (старая логика)
-//        htmlContent += `<h3>Детализация расчета:</h3>`;
-//        htmlContent += `<ul class="calculation-details-list">`;
-  if (data.interestRateType.startsWith('cbr') && data.cbrRatesUsed && data.cbrRatesUsed.length > 0) {
-        // Детализация для ключевой ставки ЦБ (оставляем как есть)
-        htmlContent += createCBRDetailedResults(data);
-    } else if (data.ratePeriod === 'month') {
-        // ДЕТАЛИЗАЦИЯ ДЛЯ МЕСЯЧНОЙ СТАВКИ - НОВЫЙ ФУНКЦИОНАЛ
-        htmlContent += createMonthlyDetailedResults(data);
-    } else if (data.calculationStages && data.calculationStages.length > 0) {
-        // Детализация для других типов ставок (годовая, дневная)
-        htmlContent += `<h3>Детализация расчета:</h3>`;
-        htmlContent += `<ul class="calculation-details-list">`;
-
-
-        data.calculationStages.forEach(stage => {
-            let formula = generateStageFormula(stage, data);
-            htmlContent += `<li class="calculation-stage">`;
-
-            if (stage.daysMethod === 'payment') {
-                htmlContent += `<div class="stage-main-info"><strong>${stage.startDate}</strong>: ${stage.description}</div>`;
-                if (stage.payment) {
-                    htmlContent += `<div class="stage-payment">Платеж: ${stage.payment.amount.toFixed(2)} руб. (${stage.payment.destination === 'debt' ? 'в счет долга' : 'в счет неустойки'})</div>`;
-                }
-            } else {
-                const methodDesc = getDaysMethodDescription(stage.daysMethod);
-                htmlContent += `<div class="stage-main-info"><strong>${stage.startDate} - ${stage.endDate}</strong>: ${stage.description}</div>`;
-
-                if (stage.interest !== undefined && stage.interest > 0) {
-                    htmlContent += `<div class="stage-interest">Проценты: ${stage.interest.toFixed(2)} руб.</div>`;
-                    if (formula) {
-                        htmlContent += `<div class="stage-formula">${formula}</div>`;
-                    }
-                }
-            }
-
-            htmlContent += `</li>`;
-        });
-
-        htmlContent += `</ul>`;
+    // Выбираем формат отображения в зависимости от настроек
+    if (useTableView) {
+        // ТАБЛИЧНЫЙ ФОРМАТ
+        if (data.interestRateType.startsWith('cbr') && data.cbrRatesUsed && data.cbrRatesUsed.length > 0) {
+            htmlContent += createCBRDetailedResultsTable(data);
+        } else if (data.ratePeriod === 'month') {
+            htmlContent += createMonthlyDetailedResultsTable(data);
+        } else if (data.ratePeriod === 'year') {
+            htmlContent += createYearlyDetailedResultsTable(data);
+        } else if (data.ratePeriod === 'day') {
+            htmlContent += createDailyDetailedResultsTable(data);
+        } else if (data.calculationStages && data.calculationStages.length > 0) {
+            htmlContent += createGenericDetailedResultsTable(data);
+        }
+    } else {
+        // ТЕКСТОВЫЙ ФОРМАТ (список)
+        if (data.interestRateType.startsWith('cbr') && data.cbrRatesUsed && data.cbrRatesUsed.length > 0) {
+            htmlContent += createCBRDetailedResultsList(data);
+        } else if (data.ratePeriod === 'month') {
+            htmlContent += createMonthlyDetailedResultsList(data);
+        } else if (data.ratePeriod === 'year') {
+            htmlContent += createYearlyDetailedResultsList(data);
+        } else if (data.ratePeriod === 'day') {
+            htmlContent += createDailyDetailedResultsList(data);
+        } else if (data.calculationStages && data.calculationStages.length > 0) {
+            htmlContent += createGenericDetailedResultsList(data);
+        }
     }
 
+    // Общая итоговая информация
     htmlContent += `<h3>Итого:</h3>`;
     htmlContent += `<p><strong>Остаток основного долга:</strong> ${data.remainingDebt.toFixed(2)} руб.</p>`;
     htmlContent += `<p><strong>Сумма начисленных ${data.interestRateType.startsWith('cbr') ? 'неустойки' : 'процентов'}:</strong> ${data.interest.toFixed(2)} руб.</p>`;
@@ -2970,6 +2931,467 @@ function showResults(data) {
     htmlContent += `<p class="total-amount"><strong>К оплате:</strong> ${data.amountToPay.toFixed(2)} руб.</p>`;
 
     container.innerHTML = htmlContent;
+}
+
+
+// ================== ФУНКЦИИ ДЛЯ ТАБЛИЧНОГО ФОРМАТА ==================
+
+function createCBRDetailedResultsTable(data) {
+    const multiplier = data.interestRateType === 'cbr_double' ? 2 : 1;
+    const rateTypeName = multiplier === 2 ? 'Ключевая ставка ЦБ РФ × 2' : 'Ключевая ставка ЦБ РФ';
+
+    let html = `<h3>Детализация расчета ${rateTypeName} (таблица):</h3>`;
+    html += `<table class="detailed-table">`;
+    html += `<tr>
+        <th>Период</th>
+        <th>Дней</th>
+        <th>Ставка ЦБ</th>
+        <th>Применяемая ставка</th>
+        <th>Сумма долга</th>
+        <th>Начислено</th>
+        <th>Примечание</th>
+    </tr>`;
+
+    let totalInterest = 0;
+    let totalDays = 0;
+
+    data.calculationStages.forEach((stage, index) => {
+        if (stage.daysMethod === 'payment') {
+            const paymentType = stage.payment.destination === 'debt' ? 'Погашение долга' : 'Погашение неустойки';
+            html += `<tr class="payment-row">
+                <td colspan="2">${stage.startDate}</td>
+                <td colspan="2">${paymentType}</td>
+                <td>${stage.principal.toFixed(2)} → ${(stage.principal - (stage.payment.destination === 'debt' ? stage.payment.amount : 0)).toFixed(2)}</td>
+                <td>-${stage.payment.amount.toFixed(2)}</td>
+                <td>${stage.payment.description}</td>
+            </tr>`;
+        } else if (stage.interest > 0) {
+            const periodRates = getCBRRatesForPeriod(new Date(stage.startDate), new Date(stage.endDate));
+            periodRates.forEach(period => {
+                const daysInYear = isLeapYear(period.startDate) ? 366 : 365;
+                const appliedRate = period.rate * multiplier;
+                const periodInterest = (stage.principal * appliedRate * period.days) / (100 * daysInYear);
+
+                totalInterest += periodInterest;
+                totalDays += period.days;
+
+                html += `<tr>
+                    <td>${period.startDate.toISOString().split('T')[0]} - ${period.endDate.toISOString().split('T')[0]}</td>
+                    <td>${period.days}</td>
+                    <td>${period.rate}%</td>
+                    <td>${appliedRate}%</td>
+                    <td>${stage.principal.toFixed(2)}</td>
+                    <td>${periodInterest.toFixed(2)}</td>
+                    <td>На сумму ${stage.principal.toFixed(2)} руб.</td>
+                </tr>`;
+            });
+        }
+    });
+
+    html += `<tr class="total-row">
+        <td colspan="2"><strong>Итого дней: ${totalDays}</strong></td>
+        <td colspan="3"><strong>Общая сумма начислений:</strong></td>
+        <td><strong>${totalInterest.toFixed(2)} руб.</strong></td>
+        <td></td>
+    </tr>`;
+    html += `</table>`;
+
+    return html;
+}
+
+function createMonthlyDetailedResultsTable(data) {
+    const monthlyRate = data.interestRateValue / 100;
+    let html = `<h3>Детализация расчета месячных процентов (таблица):</h3>`;
+    html += `<table class="detailed-table">`;
+    html += `<tr>
+        <th>Период</th>
+        <th>Дней</th>
+        <th>Тип периода</th>
+        <th>Сумма долга</th>
+        <th>Начислено</th>
+        <th>Формула</th>
+    </tr>`;
+
+    let totalInterest = 0;
+    let totalDays = 0;
+    let currentPrincipal = data.debtAmount;
+
+    const monthlyPeriods = generateMonthlyPeriods(new Date(data.startDate), new Date(data.endDate), data.calculationStages, data.daysMethod);
+
+    monthlyPeriods.forEach((period, index) => {
+        if (period.isPayment) {
+            const payment = period.payments[0];
+            if (payment.destination === 'debt') {
+                const debtBeforePayment = currentPrincipal;
+                currentPrincipal = Math.max(0, currentPrincipal - payment.amount);
+                html += `<tr class="payment-row">
+                    <td>${period.startDate}</td>
+                    <td>-</td>
+                    <td>Платеж</td>
+                    <td>${debtBeforePayment.toFixed(2)} → ${currentPrincipal.toFixed(2)}</td>
+                    <td>-${payment.amount.toFixed(2)}</td>
+                    <td>Погашение долга</td>
+                </tr>`;
+            }
+        } else {
+            let periodInterest = 0;
+            let formula = '';
+
+            if (period.isFullMonth) {
+                periodInterest = currentPrincipal * monthlyRate;
+                formula = `${currentPrincipal.toFixed(2)} × ${data.interestRateValue}%`;
+            } else {
+                const daysInCurrentMonth = getDaysInMonth(new Date(period.startDate));
+                periodInterest = currentPrincipal * monthlyRate * (period.days / daysInCurrentMonth);
+                formula = `${currentPrincipal.toFixed(2)} × ${data.interestRateValue}% × ${period.days} / ${daysInCurrentMonth}`;
+            }
+
+            totalInterest += periodInterest;
+            totalDays += period.days;
+
+            html += `<tr>
+                <td>${period.startDate} - ${period.endDate}</td>
+                <td>${period.days}</td>
+                <td>${period.isFullMonth ? 'Полный месяц' : 'Часть месяца'}</td>
+                <td>${currentPrincipal.toFixed(2)}</td>
+                <td>${periodInterest.toFixed(2)}</td>
+                <td>${formula}</td>
+            </tr>`;
+        }
+    });
+
+    html += `<tr class="total-row">
+        <td colspan="3"><strong>Итого дней: ${totalDays}</strong></td>
+        <td colspan="2"><strong>Общая сумма начислений:</strong></td>
+        <td><strong>${totalInterest.toFixed(2)} руб.</strong></td>
+    </tr>`;
+    html += `</table>`;
+
+    return html;
+}
+
+function createYearlyDetailedResultsTable(data) {
+    let html = `<h3>Детализация расчета годовых процентов (таблица):</h3>`;
+    html += `<table class="detailed-table">`;
+    html += `<tr>
+        <th>Период</th>
+        <th>Дней</th>
+        <th>Тип периода</th>
+        <th>Сумма долга</th>
+        <th>Начислено</th>
+        <th>Ставка</th>
+    </tr>`;
+
+    let totalInterest = 0;
+    let totalDays = 0;
+    let currentPrincipal = data.debtAmount;
+
+    data.calculationStages.forEach(stage => {
+        if (stage.daysMethod === 'payment') {
+            const paymentType = stage.payment.destination === 'debt' ? 'Погашение долга' : 'Погашение неустойки';
+            html += `<tr class="payment-row">
+                <td>${stage.startDate}</td>
+                <td>-</td>
+                <td>Платеж</td>
+                <td>${stage.principal.toFixed(2)}</td>
+                <td>-${stage.payment.amount.toFixed(2)}</td>
+                <td>${paymentType}</td>
+            </tr>`;
+            if (stage.payment.destination === 'debt') {
+                currentPrincipal = Math.max(0, currentPrincipal - stage.payment.amount);
+            }
+        } else if (stage.interest > 0) {
+            totalInterest += stage.interest;
+            totalDays += stage.days;
+
+            html += `<tr>
+                <td>${stage.startDate} - ${stage.endDate}</td>
+                <td>${stage.days}</td>
+                <td>${getDaysMethodDescription(stage.daysMethod)}</td>
+                <td>${stage.principal.toFixed(2)}</td>
+                <td>${stage.interest.toFixed(2)}</td>
+                <td>${data.interestRateValue}% годовых</td>
+            </tr>`;
+        }
+    });
+
+    html += `<tr class="total-row">
+        <td colspan="3"><strong>Итого дней: ${totalDays}</strong></td>
+        <td colspan="2"><strong>Общая сумма начислений:</strong></td>
+        <td><strong>${totalInterest.toFixed(2)} руб.</strong></td>
+    </tr>`;
+    html += `</table>`;
+
+    return html;
+}
+
+function createDailyDetailedResultsTable(data) {
+    let html = `<h3>Детализация расчета дневных процентов (таблица):</h3>`;
+    html += `<table class="detailed-table">`;
+    html += `<tr>
+        <th>Период</th>
+        <th>Дней</th>
+        <th>Сумма долга</th>
+        <th>Начислено</th>
+        <th>Формула</th>
+    </tr>`;
+
+    let totalInterest = 0;
+    let totalDays = 0;
+    let currentPrincipal = data.debtAmount;
+
+    data.calculationStages.forEach(stage => {
+        if (stage.daysMethod === 'payment') {
+            const paymentType = stage.payment.destination === 'debt' ? 'Погашение долга' : 'Погашение неустойки';
+            html += `<tr class="payment-row">
+                <td>${stage.startDate}</td>
+                <td>-</td>
+                <td>${stage.principal.toFixed(2)}</td>
+                <td>-${stage.payment.amount.toFixed(2)}</td>
+                <td>${paymentType}</td>
+            </tr>`;
+            if (stage.payment.destination === 'debt') {
+                currentPrincipal = Math.max(0, currentPrincipal - stage.payment.amount);
+            }
+        } else if (stage.interest > 0) {
+            totalInterest += stage.interest;
+            totalDays += stage.days;
+            const formula = `${stage.principal.toFixed(2)} × ${data.interestRateValue}% × ${stage.days}`;
+
+            html += `<tr>
+                <td>${stage.startDate} - ${stage.endDate}</td>
+                <td>${stage.days}</td>
+                <td>${stage.principal.toFixed(2)}</td>
+                <td>${stage.interest.toFixed(2)}</td>
+                <td>${formula}</td>
+            </tr>`;
+        }
+    });
+
+    html += `<tr class="total-row">
+        <td colspan="2"><strong>Итого дней: ${totalDays}</strong></td>
+        <td colspan="2"><strong>Общая сумма начислений:</strong></td>
+        <td><strong>${totalInterest.toFixed(2)} руб.</strong></td>
+    </tr>`;
+    html += `</table>`;
+
+    return html;
+}
+
+function createGenericDetailedResultsTable(data) {
+    let html = `<h3>Детализация расчета (таблица):</h3>`;
+    html += `<table class="detailed-table">`;
+    html += `<tr>
+        <th>Период</th>
+        <th>Дней</th>
+        <th>Тип</th>
+        <th>Сумма долга</th>
+        <th>Начислено</th>
+    </tr>`;
+
+    let totalInterest = 0;
+    let totalDays = 0;
+
+    data.calculationStages.forEach(stage => {
+        if (stage.daysMethod === 'payment') {
+            const paymentType = stage.payment.destination === 'debt' ? 'Погашение долга' : 'Погашение неустойки';
+            html += `<tr class="payment-row">
+                <td>${stage.startDate}</td>
+                <td>-</td>
+                <td>Платеж</td>
+                <td>${stage.principal.toFixed(2)}</td>
+                <td>-${stage.payment.amount.toFixed(2)}</td>
+            </tr>`;
+        } else {
+            totalInterest += stage.interest;
+            totalDays += stage.days;
+
+            html += `<tr>
+                <td>${stage.startDate} - ${stage.endDate}</td>
+                <td>${stage.days}</td>
+                <td>${getDaysMethodDescription(stage.daysMethod)}</td>
+                <td>${stage.principal.toFixed(2)}</td>
+                <td>${stage.interest.toFixed(2)}</td>
+            </tr>`;
+        }
+    });
+
+    html += `<tr class="total-row">
+        <td colspan="3"><strong>Итого дней: ${totalDays}</strong></td>
+        <td><strong>Общая сумма начислений:</strong></td>
+        <td><strong>${totalInterest.toFixed(2)} руб.</strong></td>
+    </tr>`;
+    html += `</table>`;
+
+    return html;
+}
+
+// ================== ФУНКЦИИ ДЛЯ ТЕКСТОВОГО ФОРМАТА (СПИСОК) ==================
+
+function createCBRDetailedResultsList(data) {
+    const multiplier = data.interestRateType === 'cbr_double' ? 2 : 1;
+    const rateTypeName = multiplier === 2 ? 'Ключевая ставка ЦБ РФ × 2' : 'Ключевая ставка ЦБ РФ';
+
+    let html = `<h3>Детализация расчета ${rateTypeName} (список):</h3>`;
+    html += `<ul class="calculation-details-list">`;
+
+    let totalInterest = 0;
+
+    data.calculationStages.forEach((stage, index) => {
+        html += `<li class="calculation-stage">`;
+
+        if (stage.daysMethod === 'payment') {
+            const paymentType = stage.payment.destination === 'debt' ? 'в счет долга' : 'в счет неустойки';
+            html += `<div class="stage-main-info"><strong>${stage.startDate}</strong>: Платеж ${stage.payment.amount.toFixed(2)} руб. (${paymentType})</div>`;
+        } else if (stage.interest > 0) {
+            const periodRates = getCBRRatesForPeriod(new Date(stage.startDate), new Date(stage.endDate));
+            periodRates.forEach(period => {
+                const daysInYear = isLeapYear(period.startDate) ? 366 : 365;
+                const appliedRate = period.rate * multiplier;
+                const periodInterest = (stage.principal * appliedRate * period.days) / (100 * daysInYear);
+                totalInterest += periodInterest;
+
+                html += `<div class="stage-main-info"><strong>${period.startDate.toISOString().split('T')[0]} - ${period.endDate.toISOString().split('T')[0]}</strong>: ${period.days} дней</div>`;
+                html += `<div class="stage-details">Ставка: ${period.rate}% → ${appliedRate}%, На сумму: ${stage.principal.toFixed(2)} руб.</div>`;
+                html += `<div class="stage-interest">Начислено: ${periodInterest.toFixed(2)} руб.</div>`;
+            });
+        }
+
+        html += `</li>`;
+    });
+
+    html += `<li class="calculation-total"><strong>Итого начислено: ${totalInterest.toFixed(2)} руб.</strong></li>`;
+    html += `</ul>`;
+
+    return html;
+}
+
+function createMonthlyDetailedResultsList(data) {
+    let html = `<h3>Детализация расчета месячных процентов (список):</h3>`;
+    html += `<ul class="calculation-details-list">`;
+
+    let totalInterest = 0;
+    let currentPrincipal = data.debtAmount;
+
+    const monthlyPeriods = generateMonthlyPeriods(new Date(data.startDate), new Date(data.endDate), data.calculationStages, data.daysMethod);
+
+    monthlyPeriods.forEach((period, index) => {
+        html += `<li class="calculation-stage">`;
+
+        if (period.isPayment) {
+            const payment = period.payments[0];
+            html += `<div class="stage-main-info"><strong>${period.startDate}</strong>: Платеж ${payment.amount.toFixed(2)} руб.</div>`;
+            if (payment.destination === 'debt') {
+                html += `<div class="stage-details">Долг: ${currentPrincipal.toFixed(2)} → ${(currentPrincipal - payment.amount).toFixed(2)} руб.</div>`;
+                currentPrincipal = Math.max(0, currentPrincipal - payment.amount);
+            }
+        } else {
+            let periodInterest = 0;
+            if (period.isFullMonth) {
+                periodInterest = currentPrincipal * (data.interestRateValue / 100);
+                html += `<div class="stage-main-info"><strong>${period.startDate} - ${period.endDate}</strong>: Полный месяц</div>`;
+            } else {
+                const daysInCurrentMonth = getDaysInMonth(new Date(period.startDate));
+                periodInterest = currentPrincipal * (data.interestRateValue / 100) * (period.days / daysInCurrentMonth);
+                html += `<div class="stage-main-info"><strong>${period.startDate} - ${period.endDate}</strong>: ${period.days} дней (часть месяца)</div>`;
+            }
+            totalInterest += periodInterest;
+
+            html += `<div class="stage-details">На сумму: ${currentPrincipal.toFixed(2)} руб.</div>`;
+            html += `<div class="stage-interest">Начислено: ${periodInterest.toFixed(2)} руб.</div>`;
+        }
+
+        html += `</li>`;
+    });
+
+    html += `<li class="calculation-total"><strong>Итого начислено: ${totalInterest.toFixed(2)} руб.</strong></li>`;
+    html += `</ul>`;
+
+    return html;
+}
+
+function createYearlyDetailedResultsList(data) {
+    let html = `<h3>Детализация расчета годовых процентов (список):</h3>`;
+    html += `<ul class="calculation-details-list">`;
+
+    let totalInterest = 0;
+
+    data.calculationStages.forEach(stage => {
+        html += `<li class="calculation-stage">`;
+
+        if (stage.daysMethod === 'payment') {
+            const paymentType = stage.payment.destination === 'debt' ? 'в счет долга' : 'в счет неустойки';
+            html += `<div class="stage-main-info"><strong>${stage.startDate}</strong>: Платеж ${stage.payment.amount.toFixed(2)} руб. (${paymentType})</div>`;
+        } else if (stage.interest > 0) {
+            totalInterest += stage.interest;
+            html += `<div class="stage-main-info"><strong>${stage.startDate} - ${stage.endDate}</strong>: ${stage.days} дней</div>`;
+            html += `<div class="stage-details">На сумму: ${stage.principal.toFixed(2)} руб., Ставка: ${data.interestRateValue}% годовых</div>`;
+            html += `<div class="stage-interest">Начислено: ${stage.interest.toFixed(2)} руб.</div>`;
+        }
+
+        html += `</li>`;
+    });
+
+    html += `<li class="calculation-total"><strong>Итого начислено: ${totalInterest.toFixed(2)} руб.</strong></li>`;
+    html += `</ul>`;
+
+    return html;
+}
+
+function createDailyDetailedResultsList(data) {
+    let html = `<h3>Детализация расчета дневных процентов (список):</h3>`;
+    html += `<ul class="calculation-details-list">`;
+
+    let totalInterest = 0;
+
+    data.calculationStages.forEach(stage => {
+        html += `<li class="calculation-stage">`;
+
+        if (stage.daysMethod === 'payment') {
+            const paymentType = stage.payment.destination === 'debt' ? 'в счет долга' : 'в счет неустойки';
+            html += `<div class="stage-main-info"><strong>${stage.startDate}</strong>: Платеж ${stage.payment.amount.toFixed(2)} руб. (${paymentType})</div>`;
+        } else if (stage.interest > 0) {
+            totalInterest += stage.interest;
+            html += `<div class="stage-main-info"><strong>${stage.startDate} - ${stage.endDate}</strong>: ${stage.days} дней</div>`;
+            html += `<div class="stage-details">На сумму: ${stage.principal.toFixed(2)} руб., Ставка: ${data.interestRateValue}% в день</div>`;
+            html += `<div class="stage-interest">Начислено: ${stage.interest.toFixed(2)} руб.</div>`;
+        }
+
+        html += `</li>`;
+    });
+
+    html += `<li class="calculation-total"><strong>Итого начислено: ${totalInterest.toFixed(2)} руб.</strong></li>`;
+    html += `</ul>`;
+
+    return html;
+}
+
+function createGenericDetailedResultsList(data) {
+    let html = `<h3>Детализация расчета (список):</h3>`;
+    html += `<ul class="calculation-details-list">`;
+
+    let totalInterest = 0;
+
+    data.calculationStages.forEach(stage => {
+        html += `<li class="calculation-stage">`;
+
+        if (stage.daysMethod === 'payment') {
+            const paymentType = stage.payment.destination === 'debt' ? 'в счет долга' : 'в счет неустойки';
+            html += `<div class="stage-main-info"><strong>${stage.startDate}</strong>: Платеж ${stage.payment.amount.toFixed(2)} руб. (${paymentType})</div>`;
+        } else if (stage.interest > 0) {
+            totalInterest += stage.interest;
+            html += `<div class="stage-main-info"><strong>${stage.startDate} - ${stage.endDate}</strong>: ${stage.days} дней</div>`;
+            html += `<div class="stage-details">На сумму: ${stage.principal.toFixed(2)} руб.</div>`;
+            html += `<div class="stage-interest">Начислено: ${stage.interest.toFixed(2)} руб.</div>`;
+        }
+
+        html += `</li>`;
+    });
+
+    html += `<li class="calculation-total"><strong>Итого начислено: ${totalInterest.toFixed(2)} руб.</strong></li>`;
+    html += `</ul>`;
+
+    return html;
 }
 
 
@@ -3738,12 +4160,52 @@ function copyResults() {
 
 // ================== Инициализация при загрузке ==================
 
+//function initCalculator() {
+//    // Очистка при уходе со страницы
+//    window.addEventListener('beforeunload', () => {
+//        domObservers.forEach(observer => observer.disconnect());
+//        domObservers.length = 0;
+//        calculatorInitialized = false;
+//    });
+//
+//    // Пытаемся инициализировать сразу
+//    if (document.readyState === 'complete') {
+//        setTimeout(initializeCalculator, 0);
+//    } else {
+//        document.addEventListener('DOMContentLoaded', () => {
+//            setTimeout(initializeCalculator, 100);
+//        });
+//    }
+//
+//    // Резервная инициализация через 2 секунды
+//    setTimeout(() => {
+//        if (!calculatorInitialized) {
+//            initializeCalculator();
+//        }
+//    }, 2000);
+//}
+
 function initCalculator() {
     // Очистка при уходе со страницы
     window.addEventListener('beforeunload', () => {
         domObservers.forEach(observer => observer.disconnect());
         domObservers.length = 0;
         calculatorInitialized = false;
+        initializationAttempts = 0;
+    });
+
+    // Отслеживаем возврат на страницу
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            console.log('Страница стала видимой. Проверяем состояние калькулятора...');
+
+            // Проверяем, есть ли элементы калькулятора, но он не инициализирован
+            const calculatorContainer = document.querySelector('.calculator-container');
+            if (calculatorContainer && !calculatorInitialized) {
+                console.log('Переинициализируем калькулятор после возврата на страницу...');
+                initializeCalculator();
+            }
+        }
     });
 
     // Пытаемся инициализировать сразу
@@ -3811,6 +4273,18 @@ function debugDaysCalculation() {
         console.log(`Ожидалось: ${expectedDays} дней, Разница: ${days - expectedDays}`);
     });
 }
+
+window.addEventListener('beforeunload', () => {
+    // Очищаем всех наблюдателей при уходе со страницы
+    console.log('Пользователь покидает страницу. Очищаем наблюдателей.');
+    domObservers.forEach(observer => observer.disconnect());
+    domObservers.length = 0;
+
+    // Сбрасываем флаги инициализации
+    calculatorInitialized = false;
+    isCalculatorPage = false;
+    initializationAttempts = 0;
+});
 
 // Запуск инициализации
 initCalculator();
