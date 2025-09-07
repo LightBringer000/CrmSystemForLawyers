@@ -23,8 +23,6 @@
               title="msg://ru.ak.lawcrmsystem3.view.legaldocumentdata/legalDocumentDataListView.title"/>
         <item view="InteractionsHistory.list"
               title="msg://ru.ak.lawcrmsystem3.view.interactionshistory/interactionsHistoryListView.title"/>
-        <!--<item view="CaseStageView" title="msg://ru.ak.lawcrmsystem3.view.casestage/caseStageView.title"/>-->
-        <!--<item view="ProcessView" title="msg://ru.ak.lawcrmsystem3.view.process/processView.title"/>-->
         <item view="TranscriptionRecord.list"
               title="msg://ru.ak.lawcrmsystem3.view.transcriptionrecord/transcriptionRecordListView.title"/>
         <item view="CalculatorView" title="msg://ru.ak.lawcrmsystem3.view.calculator/calculatorView.title"/>

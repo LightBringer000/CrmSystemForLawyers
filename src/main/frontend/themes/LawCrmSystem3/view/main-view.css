@@ -126,3 +126,24 @@ jmix-full-calendar .uisamples-weekend.uisamples-today .fc-daygrid-day-number {
     background-color: var(--lumo-error-color-10pct);
     color: var(--lumo-error-text-color);
 }
+/*
+ * Добавление кнопки с невыполненными задачами.
+ */
+.jmix-main-view-footer-hbox {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+.main-footer-layout {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+.footer-buttons-hbox {
+    display: flex;
+    justify-content: flex-end;
+}
+.user-and-logout-hbox {
+    display: flex;
+    justify-content: space-between;
+}

@@ -14,7 +14,6 @@ import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.vosk.Model;
 import org.vosk.Recognizer;
 import ru.ak.lawcrmsystem3.entity.TranscriptionRecord;
@@ -60,16 +59,19 @@ public class AudioTranscriptionService implements PdfService{
     @Autowired
     private Notifications notifications;
 
+    @Autowired
+    private TranscriptionModel transcriptionModel;
+
     private Model voskModel;
 
-    @PostConstruct
-    public void init() {
-        try {
-            voskModel = new Model("C:\\Users\\Flame\\IdeaProjects\\vosk-model-ru-0.22");
-        } catch (Exception e) {
-            log.error("Failed to load Vosk model", e);
-        }
-    }
+//    @PostConstruct
+//    public void init() {
+//        try {
+//            voskModel = new Model("C:\\Users\\Flame\\IdeaProjects\\vosk-model-ru-0.22");
+//        } catch (Exception e) {
+//            log.error("Failed to load Vosk model", e);
+//        }
+//    }
 
 
     public TranscriptionRecord processAudio(InputStream audioStream) {
@@ -80,7 +82,8 @@ public class AudioTranscriptionService implements PdfService{
         try {
             wavFile = convertToWav(audioStream);
 
-            String garbledText = transcribe(wavFile);
+            //String garbledText = transcribe(wavFile);
+            String garbledText = transcriptionModel.transcribe(wavFile);
             String correctText = decodeGarbledText(garbledText); // Используем ваш метод для исправления
             record.setTextContent(correctText);
             byte[] pdfBytes = createPdfWithRussianFont(correctText);
@@ -309,47 +312,47 @@ public class AudioTranscriptionService implements PdfService{
     }
 
 
-    private String transcribe(File audioFile) throws Exception {
-        try (AudioInputStream ais = AudioSystem.getAudioInputStream(audioFile);
-             Recognizer recognizer = new Recognizer(voskModel, 16000)) {
-
-            byte[] buffer = new byte[4096];
-            int bytesRead;
-            StringBuilder result = new StringBuilder();
-            ObjectMapper mapper = new ObjectMapper();
-
-            while ((bytesRead = ais.read(buffer)) >= 0) {
-                if (recognizer.acceptWaveForm(buffer, bytesRead)) {
-                    String voskResultJson = recognizer.getResult();
-
-                    // Явно декодируем JSON-строку, используя кодировку Windows-1251
-                    byte[] jsonBytes = voskResultJson.getBytes("windows-1251");
-                    String decodedJsonString = new String(jsonBytes, StandardCharsets.UTF_8);
-
-                    JsonNode rootNode = mapper.readTree(decodedJsonString);
-                    String partialText = rootNode.path("text").asText();
-                    result.append(partialText).append(" ");
-                }
-            }
-
-            String voskFinalResultJson = recognizer.getFinalResult();
-
-            // Явно декодируем финальную JSON-строку, используя кодировку Windows-1251
-            byte[] finalJsonBytes = voskFinalResultJson.getBytes("windows-1251");
-            String finalDecodedJsonString = new String(finalJsonBytes, StandardCharsets.UTF_8);
-
-            JsonNode finalNode = mapper.readTree(finalDecodedJsonString);
-            String finalText = finalNode.path("text").asText();
-            result.append(finalText);
-
-            String finalTranscription = result.toString().trim();
-
-            // Логируем сырые байты для диагностики
-            log.debug("Raw bytes: {}", Arrays.toString(finalTranscription.getBytes(StandardCharsets.UTF_8)));
-
-            return finalTranscription;
-        }
-    }
+//    private String transcribe(File audioFile) throws Exception {
+//        try (AudioInputStream ais = AudioSystem.getAudioInputStream(audioFile);
+//             Recognizer recognizer = new Recognizer(voskModel, 16000)) {
+//
+//            byte[] buffer = new byte[4096];
+//            int bytesRead;
+//            StringBuilder result = new StringBuilder();
+//            ObjectMapper mapper = new ObjectMapper();
+//
+//            while ((bytesRead = ais.read(buffer)) >= 0) {
+//                if (recognizer.acceptWaveForm(buffer, bytesRead)) {
+//                    String voskResultJson = recognizer.getResult();
+//
+//                    // Явно декодируем JSON-строку, используя кодировку Windows-1251
+//                    byte[] jsonBytes = voskResultJson.getBytes("windows-1251");
+//                    String decodedJsonString = new String(jsonBytes, StandardCharsets.UTF_8);
+//
+//                    JsonNode rootNode = mapper.readTree(decodedJsonString);
+//                    String partialText = rootNode.path("text").asText();
+//                    result.append(partialText).append(" ");
+//                }
+//            }
+//
+//            String voskFinalResultJson = recognizer.getFinalResult();
+//
+//            // Явно декодируем финальную JSON-строку, используя кодировку Windows-1251
+//            byte[] finalJsonBytes = voskFinalResultJson.getBytes("windows-1251");
+//            String finalDecodedJsonString = new String(finalJsonBytes, StandardCharsets.UTF_8);
+//
+//            JsonNode finalNode = mapper.readTree(finalDecodedJsonString);
+//            String finalText = finalNode.path("text").asText();
+//            result.append(finalText);
+//
+//            String finalTranscription = result.toString().trim();
+//
+//            // Логируем сырые байты для диагностики
+//            log.debug("Raw bytes: {}", Arrays.toString(finalTranscription.getBytes(StandardCharsets.UTF_8)));
+//
+//            return finalTranscription;
+//        }
+//    }
 
     public File convertToWav(InputStream inputStream) throws IOException {
         log.info("Начинаем конвертацию аудио из InputStream.");

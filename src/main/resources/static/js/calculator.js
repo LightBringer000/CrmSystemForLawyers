@@ -1527,69 +1527,84 @@ function calculateDailyRate(rateType, rateValue, ratePeriod, startDate, endDate,
     }
 }
 
-function getNextRateChangeDate(currentDate) {
-    const rateHistory = [
-                { start: new Date('2025-07-28'), end: new Date('9999-12-31'), rate: 18.00 },
-                { start: new Date('2025-06-09'), end: new Date('2025-07-27'), rate: 20.00 },
-                { start: new Date('2024-10-28'), end: new Date('2025-06-08'), rate: 21.00 },
-                { start: new Date('2024-09-16'), end: new Date('2024-10-27'), rate: 19.00 },
-                { start: new Date('2024-07-29'), end: new Date('2024-09-15'), rate: 18.00 },
-                { start: new Date('2023-12-18'), end: new Date('2024-07-28'), rate: 16.00 },
-                { start: new Date('2023-10-30'), end: new Date('2023-12-17'), rate: 15.00 },
-                { start: new Date('2023-09-18'), end: new Date('2023-10-29'), rate: 13.00 },
-                { start: new Date('2023-08-15'), end: new Date('2023-09-17'), rate: 12.00 },
-                { start: new Date('2023-07-24'), end: new Date('2023-08-14'), rate: 8.50 },
-                { start: new Date('2022-09-19'), end: new Date('2023-07-23'), rate: 7.50 },
-                { start: new Date('2022-07-25'), end: new Date('2022-09-18'), rate: 8.00 },
-                { start: new Date('2022-06-14'), end: new Date('2022-07-24'), rate: 9.50 },
-                { start: new Date('2022-05-27'), end: new Date('2022-06-13'), rate: 11.00 },
-                { start: new Date('2022-05-04'), end: new Date('2022-05-26'), rate: 14.00 },
-                { start: new Date('2022-04-11'), end: new Date('2022-05-03'), rate: 17.00 },
-                { start: new Date('2022-02-28'), end: new Date('2022-04-10'), rate: 20.00 },
-                { start: new Date('2022-02-14'), end: new Date('2022-02-27'), rate: 9.50 },
-                { start: new Date('2021-12-20'), end: new Date('2022-02-13'), rate: 8.50 },
-                { start: new Date('2021-10-25'), end: new Date('2021-12-19'), rate: 7.50 },
-                { start: new Date('2021-09-13'), end: new Date('2021-10-24'), rate: 6.75 },
-                { start: new Date('2021-07-26'), end: new Date('2021-09-12'), rate: 6.50 },
-                { start: new Date('2021-06-15'), end: new Date('2021-07-25'), rate: 5.50 },
-                { start: new Date('2021-04-26'), end: new Date('2021-06-14'), rate: 5.00 },
-                { start: new Date('2021-03-22'), end: new Date('2021-04-25'), rate: 4.50 },
-                { start: new Date('2020-07-27'), end: new Date('2021-03-21'), rate: 4.25 },
-                { start: new Date('2020-06-22'), end: new Date('2020-07-26'), rate: 4.50 },
-                { start: new Date('2020-04-27'), end: new Date('2020-06-21'), rate: 5.50 },
-                { start: new Date('2020-02-10'), end: new Date('2020-04-26'), rate: 6.00 },
-                { start: new Date('2019-12-16'), end: new Date('2020-02-09'), rate: 6.25 },
-                { start: new Date('2019-10-28'), end: new Date('2019-12-15'), rate: 6.50 },
-                { start: new Date('2019-09-09'), end: new Date('2019-10-27'), rate: 7.00 },
-                { start: new Date('2019-07-29'), end: new Date('2019-09-08'), rate: 7.25 },
-                { start: new Date('2019-06-17'), end: new Date('2019-07-28'), rate: 7.50 },
-                { start: new Date('2018-12-17'), end: new Date('2019-06-16'), rate: 7.75 },
-                { start: new Date('2018-09-17'), end: new Date('2018-12-16'), rate: 7.50 },
-                { start: new Date('2018-03-26'), end: new Date('2018-09-16'), rate: 7.25 },
-                { start: new Date('2018-02-12'), end: new Date('2018-03-25'), rate: 7.50 },
-                { start: new Date('2017-12-18'), end: new Date('2018-02-11'), rate: 7.75 },
-                { start: new Date('2017-10-30'), end: new Date('2017-12-17'), rate: 8.25 },
-                { start: new Date('2017-09-18'), end: new Date('2017-10-29'), rate: 8.50 },
-                { start: new Date('2017-06-19'), end: new Date('2017-09-17'), rate: 9.00 },
-                { start: new Date('2017-05-02'), end: new Date('2017-06-18'), rate: 9.25 },
-                { start: new Date('2017-03-27'), end: new Date('2017-05-01'), rate: 9.75 },
-                { start: new Date('2016-09-19'), end: new Date('2017-03-26'), rate: 10.00 },
-                { start: new Date('2016-08-01'), end: new Date('2016-09-18'), rate: 10.50 }
-            ];
+//function getNextRateChangeDate(currentDate) {
+//    const rateHistory = [
+//                { start: new Date('2025-07-28'), end: new Date('9999-12-31'), rate: 18.00 },
+//                { start: new Date('2025-06-09'), end: new Date('2025-07-27'), rate: 20.00 },
+//                { start: new Date('2024-10-28'), end: new Date('2025-06-08'), rate: 21.00 },
+//                { start: new Date('2024-09-16'), end: new Date('2024-10-27'), rate: 19.00 },
+//                { start: new Date('2024-07-29'), end: new Date('2024-09-15'), rate: 18.00 },
+//                { start: new Date('2023-12-18'), end: new Date('2024-07-28'), rate: 16.00 },
+//                { start: new Date('2023-10-30'), end: new Date('2023-12-17'), rate: 15.00 },
+//                { start: new Date('2023-09-18'), end: new Date('2023-10-29'), rate: 13.00 },
+//                { start: new Date('2023-08-15'), end: new Date('2023-09-17'), rate: 12.00 },
+//                { start: new Date('2023-07-24'), end: new Date('2023-08-14'), rate: 8.50 },
+//                { start: new Date('2022-09-19'), end: new Date('2023-07-23'), rate: 7.50 },
+//                { start: new Date('2022-07-25'), end: new Date('2022-09-18'), rate: 8.00 },
+//                { start: new Date('2022-06-14'), end: new Date('2022-07-24'), rate: 9.50 },
+//                { start: new Date('2022-05-27'), end: new Date('2022-06-13'), rate: 11.00 },
+//                { start: new Date('2022-05-04'), end: new Date('2022-05-26'), rate: 14.00 },
+//                { start: new Date('2022-04-11'), end: new Date('2022-05-03'), rate: 17.00 },
+//                { start: new Date('2022-02-28'), end: new Date('2022-04-10'), rate: 20.00 },
+//                { start: new Date('2022-02-14'), end: new Date('2022-02-27'), rate: 9.50 },
+//                { start: new Date('2021-12-20'), end: new Date('2022-02-13'), rate: 8.50 },
+//                { start: new Date('2021-10-25'), end: new Date('2021-12-19'), rate: 7.50 },
+//                { start: new Date('2021-09-13'), end: new Date('2021-10-24'), rate: 6.75 },
+//                { start: new Date('2021-07-26'), end: new Date('2021-09-12'), rate: 6.50 },
+//                { start: new Date('2021-06-15'), end: new Date('2021-07-25'), rate: 5.50 },
+//                { start: new Date('2021-04-26'), end: new Date('2021-06-14'), rate: 5.00 },
+//                { start: new Date('2021-03-22'), end: new Date('2021-04-25'), rate: 4.50 },
+//                { start: new Date('2020-07-27'), end: new Date('2021-03-21'), rate: 4.25 },
+//                { start: new Date('2020-06-22'), end: new Date('2020-07-26'), rate: 4.50 },
+//                { start: new Date('2020-04-27'), end: new Date('2020-06-21'), rate: 5.50 },
+//                { start: new Date('2020-02-10'), end: new Date('2020-04-26'), rate: 6.00 },
+//                { start: new Date('2019-12-16'), end: new Date('2020-02-09'), rate: 6.25 },
+//                { start: new Date('2019-10-28'), end: new Date('2019-12-15'), rate: 6.50 },
+//                { start: new Date('2019-09-09'), end: new Date('2019-10-27'), rate: 7.00 },
+//                { start: new Date('2019-07-29'), end: new Date('2019-09-08'), rate: 7.25 },
+//                { start: new Date('2019-06-17'), end: new Date('2019-07-28'), rate: 7.50 },
+//                { start: new Date('2018-12-17'), end: new Date('2019-06-16'), rate: 7.75 },
+//                { start: new Date('2018-09-17'), end: new Date('2018-12-16'), rate: 7.50 },
+//                { start: new Date('2018-03-26'), end: new Date('2018-09-16'), rate: 7.25 },
+//                { start: new Date('2018-02-12'), end: new Date('2018-03-25'), rate: 7.50 },
+//                { start: new Date('2017-12-18'), end: new Date('2018-02-11'), rate: 7.75 },
+//                { start: new Date('2017-10-30'), end: new Date('2017-12-17'), rate: 8.25 },
+//                { start: new Date('2017-09-18'), end: new Date('2017-10-29'), rate: 8.50 },
+//                { start: new Date('2017-06-19'), end: new Date('2017-09-17'), rate: 9.00 },
+//                { start: new Date('2017-05-02'), end: new Date('2017-06-18'), rate: 9.25 },
+//                { start: new Date('2017-03-27'), end: new Date('2017-05-01'), rate: 9.75 },
+//                { start: new Date('2016-09-19'), end: new Date('2017-03-26'), rate: 10.00 },
+//                { start: new Date('2016-08-01'), end: new Date('2016-09-18'), rate: 10.50 }
+//            ];
+//
+//    // Находим текущий период
+//    const currentPeriod = rateHistory.find(p =>
+//        currentDate >= p.start && currentDate <= p.end
+//    );
+//
+//    if (currentPeriod) {
+//        // Возвращаем дату окончания текущего периода + 1 день
+//        const nextDate = new Date(currentPeriod.end);
+//        nextDate.setDate(nextDate.getDate() + 1);
+//        return nextDate;
+//    }
+//
+//    return new Date('9999-12-31'); // По умолчанию
+//}
 
-    // Находим текущий период
-    const currentPeriod = rateHistory.find(p =>
+function getNextRateChangeDate(currentDate) {
+    // Используем глобальный массив CBR_RATE_HISTORY
+    const currentPeriod = CBR_RATE_HISTORY.find(p =>
         currentDate >= p.start && currentDate <= p.end
     );
 
     if (currentPeriod) {
-        // Возвращаем дату окончания текущего периода + 1 день
         const nextDate = new Date(currentPeriod.end);
         nextDate.setDate(nextDate.getDate() + 1);
         return nextDate;
     }
 
-    return new Date('9999-12-31'); // По умолчанию
+    return new Date('9999-12-31');
 }
 
 function getRatePeriods() {
