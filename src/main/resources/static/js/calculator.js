@@ -338,20 +338,47 @@ function setupNumberValidation() {
 
 // ================== Функции расчета ==================
 
+//function debugDateCalculation() {
+//    const startInput = document.getElementById('start-period');
+//    const endInput = document.getElementById('end-period');
+//
+//    if (startInput && endInput) {
+//        const startDate = parseDateWithoutTimezone(startInput.value);
+//        const endDate = parseDateWithoutTimezone(endInput.value);
+//
+//        console.log('=== ДЕБАГ ДАТ ===');
+//        console.log('Введенная начальная дата:', startInput.value);
+//        console.log('Введенная конечная дата:', endInput.value);
+//        console.log('Объект Date начальной:', startDate);
+//        console.log('Объект Date конечной:', endDate);
+//        console.log('Дней между:', calculateDaysBetween(startDate, endDate, 'includeStartExcludeEnd'));
+//    }
+//}
+
 function debugDateCalculation() {
     const startInput = document.getElementById('start-period');
     const endInput = document.getElementById('end-period');
+    const ratePeriodSelect = document.getElementById('rate-period');
 
-    if (startInput && endInput) {
+    if (startInput && endInput && ratePeriodSelect) {
         const startDate = parseDateWithoutTimezone(startInput.value);
         const endDate = parseDateWithoutTimezone(endInput.value);
+        const ratePeriod = ratePeriodSelect.value;
+        const method = getDaysCalculationMethod();
 
         console.log('=== ДЕБАГ ДАТ ===');
         console.log('Введенная начальная дата:', startInput.value);
         console.log('Введенная конечная дата:', endInput.value);
-        console.log('Объект Date начальной:', startDate);
-        console.log('Объект Date конечной:', endDate);
-        console.log('Дней между:', calculateDaysBetween(startDate, endDate, 'includeStartExcludeEnd'));
+        console.log('Период ставки:', ratePeriod);
+        console.log('Метод расчета дней:', method);
+        console.log('Дней между:', calculateDaysBetween(startDate, endDate, method));
+
+        // Специфичная информация для годовой ставки
+        if (startDate.getTime() === endDate.getTime() && ratePeriod === 'year') {
+            const daysInYear = isLeapYear(startDate) ? 366 : 365;
+            const dailyRate = (parseFloat(document.getElementById('rate-value').value) || 0) / daysInYear;
+            console.log('⚠️ Годовая ставка для 1 дня:', (dailyRate * 100).toFixed(6) + '%');
+        }
     }
 }
 
@@ -445,48 +472,6 @@ function setDefaultDates(elements) {
     }
 }
 
-//function validateCalculationInputs(debtAmount, startDate, endDate, rateValue) {
-//    console.log('=== ВАЛИДАЦИЯ ДАТ ===');
-//    console.log('Start date (ISO):', startDate.toISOString().split('T')[0]);
-//    console.log('End date (ISO):', endDate.toISOString().split('T')[0]);
-//    console.log('Start date object:', startDate.toString());
-//    console.log('End date object:', endDate.toString());
-//    console.log('Start date local:', startDate.toLocaleDateString());
-//    console.log('End date local:', endDate.toLocaleDateString());
-//
-//    console.log('=== ОТЛАДКА validateCalculationInputs ===');
-//    console.log('Даты при валидации:', startDate, '-', endDate);
-//    console.log('debtAmount:', debtAmount);
-//    console.log('rateValue:', rateValue);
-//
-//    if (debtAmount <= 0) {
-//        console.log('❌ Ошибка: debtAmount <= 0');
-//        alert('Основная сумма задолженности должна быть больше 0');
-//        return false;
-//    }
-//
-//    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-//        console.log('❌ Ошибка: некорректные даты');
-//        alert('Пожалуйста, выберите корректные даты периода расчета');
-//        return false;
-//    }
-//
-//    if (startDate > endDate) {
-//        console.log('❌ Ошибка: startDate > endDate', startDate, endDate);
-//        alert('Дата начала периода не может быть позже даты окончания');
-//        return false;
-//    }
-//
-//    if (rateValue <= 0 || isNaN(rateValue)) {
-//        console.log('❌ Ошибка: rateValue <= 0 или не число');
-//        alert('Процентная ставка должна быть положительным числом');
-//        return false;
-//    }
-//
-//    console.log('✅ Валидация пройдена успешно');
-//    return true;
-//}
-
 function validateCalculationInputs(debtAmount, startDate, endDate, rateValue, rateType) {
     console.log('=== ВАЛИДАЦИЯ ДАТ ===');
     console.log('Start date (ISO):', startDate.toISOString().split('T')[0]);
@@ -576,21 +561,331 @@ function performCalculation(debtAmount, startDate, endDate, rateType, rateValue,
 
 // ================== ФУНКЦИЯ РАСЧЕТА ДОГОВОРНЫХ ПРОЦЕНТОВ ==================
 
+//function calculateContractualInterest(debtAmount, startDate, endDate, rateValue, ratePeriod,
+//                                    payments, overallDaysMethod, intermediateDaysMethod, maxRate) {
+//
+//     let currentDebt = debtAmount;
+//        let totalInterest = 0;
+//        let currentDate = new Date(startDate);
+//        const endDateOnly = new Date(endDate);
+//
+//        // ОСНОВНОЕ ИЗМЕНЕНИЕ: для метода excludeStartIncludeEnd включаем конечный день
+//        if (overallDaysMethod === 'excludeStartIncludeEnd') {
+//            endDateOnly.setDate(endDateOnly.getDate() + 0); // Конечный день уже включен
+//        }
+//
+//        const calculationStages = [];
+//        const totalDays = calculateDaysBetween(currentDate, endDateOnly, overallDaysMethod);
+//
+//    // Для годовой ставки используем специальную логику расчета по годовщинам
+//    if (ratePeriod === 'year') {
+//        const yearlyResult = calculateYearlyInterestByAnniversary(
+//            currentDebt, rateValue, startDate, endDateOnly, payments, overallDaysMethod
+//        );
+//
+//        // Применяем ограничение максимальной ставки
+//        let appliedMaxRate = null;
+//        if (maxRate && !isNaN(maxRate) && maxRate !== Infinity) {
+//            const maxInterest = debtAmount * (maxRate / 100);
+//            if (yearlyResult.totalInterest > maxInterest) {
+//                const scaleFactor = maxInterest / yearlyResult.totalInterest;
+//                yearlyResult.calculationStages.forEach(stage => {
+//                    if (stage.interest > 0) {
+//                        stage.interest = stage.interest * scaleFactor;
+//                    }
+//                });
+//                yearlyResult.totalInterest = maxInterest;
+//                appliedMaxRate = maxRate;
+//            }
+//        }
+//
+//        const totalPayments = getTotalPayments();
+//        const debtPayments = getDebtPayments();
+//        const penaltyPayments = getPenaltyPayments();
+//        const amountToPay = Math.max(0, yearlyResult.finalPrincipal + yearlyResult.totalInterest - penaltyPayments);
+//
+//        return {
+//            debtAmount,
+//            startDate: startDate.toISOString().split('T')[0],
+//            endDate: endDate.toISOString().split('T')[0],
+//            days: totalDays,
+//            interestRate: `${rateValue}% (годовая)`,
+//            interestRateType: 'fixed',
+//            interestRateValue: rateValue,
+//            cbrRatesUsed: null,
+//            dailyRate: calculateDailyRate('fixed', rateValue, ratePeriod, startDate, endDate, overallDaysMethod) * 100,
+//            interest: yearlyResult.totalInterest,
+//            totalPayments,
+//            debtPayments,
+//            penaltyPayments,
+//            remainingDebt: yearlyResult.finalPrincipal,
+//            totalDebt: yearlyResult.finalPrincipal + yearlyResult.totalInterest,
+//            amountToPay: amountToPay,
+//            maxRate: appliedMaxRate,
+//            calculationStages: yearlyResult.calculationStages,
+//            daysMethod: overallDaysMethod,
+//            ratePeriod: ratePeriod
+//        };
+//    }
+//
+//    // Обрабатываем каждый платеж для других типов ставок (месячная, дневная)
+//    for (const payment of payments) {
+//        const paymentDate = parseDateWithoutTimezone(payment.date);
+//        const paymentDateUTC = new Date(Date.UTC(paymentDate.getFullYear(), paymentDate.getMonth(), paymentDate.getDate()));
+//
+//        if (paymentDateUTC > endDateOnly) break;
+//
+//        if (overallDaysMethod === 'excludeStartIncludeEnd') {
+//                // Не пропускаем платежи, даже если они в "начальный" день (который исключен)
+//                if (paymentDateUTC < currentDate && paymentDateUTC.getTime() !== startDate.getTime()) continue;
+//            } else {
+//                if (paymentDateUTC < currentDate) continue;
+//            }
+//
+//        if (paymentDateUTC < currentDate) continue;
+//
+//        // Расчет процентов за период ДО платежа
+//        const daysUntilPayment = calculateDaysBetween(currentDate, paymentDateUTC, intermediateDaysMethod);
+//
+//        if (daysUntilPayment > 0) {
+//            let periodInterest;
+//
+//            if (ratePeriod === 'month') {
+//                periodInterest = calculateMonthlyInterest(
+//                    currentDebt, rateValue, currentDate, paymentDateUTC, intermediateDaysMethod
+//                );
+//            } else {
+//                if (ratePeriod === 'day') {
+//                    periodInterest = currentDebt * (rateValue / 100) * daysUntilPayment;
+//                } else {
+//                    const daysInYear = isLeapYear(currentDate) ? 366 : 365;
+//                    periodInterest = (currentDebt * rateValue * daysUntilPayment) / (100 * daysInYear);
+//                }
+//            }
+//
+//            calculationStages.push({
+//                startDate: currentDate.toISOString().split('T')[0],
+//                endDate: paymentDateUTC.toISOString().split('T')[0],
+//                days: daysUntilPayment,
+//                principal: currentDebt,
+//                interest: periodInterest,
+//                dailyRate: daysUntilPayment > 0 ? periodInterest / (currentDebt * daysUntilPayment) : 0,
+//                payment: null,
+//                daysMethod: intermediateDaysMethod,
+//                description: `Проценты на сумму ${currentDebt.toFixed(2)} руб. за ${daysUntilPayment} дней`
+//            });
+//
+//            totalInterest += periodInterest;
+//        }
+//
+//        // Применяем платеж
+//        if (payment.destination === 'debt') {
+//            const debtBeforePayment = currentDebt;
+//            currentDebt = Math.max(0, currentDebt - payment.amount);
+//
+//            calculationStages.push({
+//                startDate: paymentDateUTC.toISOString().split('T')[0],
+//                endDate: paymentDateUTC.toISOString().split('T')[0],
+//                days: 0,
+//                principal: debtBeforePayment,
+//                interest: 0,
+//                dailyRate: 0,
+//                payment: {
+//                    date: payment.date,
+//                    amount: payment.amount,
+//                    destination: payment.destination,
+//                    description: `Погашение долга: ${payment.amount.toFixed(2)} руб.`
+//                },
+//                daysMethod: 'payment',
+//                description: `Платеж: ${payment.amount.toFixed(2)} руб. Остаток долга: ${currentDebt.toFixed(2)} руб.`
+//            });
+//        } else if (payment.destination === 'penalty') {
+//            calculationStages.push({
+//                startDate: paymentDateUTC.toISOString().split('T')[0],
+//                endDate: paymentDateUTC.toISOString().split('T')[0],
+//                days: 0,
+//                principal: currentDebt,
+//                interest: -payment.amount,
+//                dailyRate: 0,
+//                payment: {
+//                    date: payment.date,
+//                    amount: payment.amount,
+//                    destination: payment.destination,
+//                    description: `Погашение неустойки: ${payment.amount.toFixed(2)} руб.`
+//                },
+//                daysMethod: 'payment',
+//                description: `Платеж в счет неустойки: ${payment.amount.toFixed(2)} руб.`
+//            });
+//
+//            totalInterest = Math.max(0, totalInterest - payment.amount);
+//        }
+//
+//        currentDate = new Date(paymentDateUTC);
+//        currentDate.setUTCDate(currentDate.getUTCDate() + 1);
+//    }
+//
+//    // Расчет за оставшийся период
+//    if (currentDate <= endDateOnly) {
+//        const remainingDays = calculateDaysBetween(currentDate, endDateOnly, overallDaysMethod);
+//
+//        if (remainingDays > 0) {
+//            let remainingInterest;
+//
+//            if (ratePeriod === 'month') {
+//                remainingInterest = calculateMonthlyInterest(
+//                    currentDebt, rateValue, currentDate, endDateOnly, overallDaysMethod
+//                );
+//            } else {
+//                if (ratePeriod === 'day') {
+//                    remainingInterest = currentDebt * (rateValue / 100) * remainingDays;
+//                } else {
+//                    const daysInYear = isLeapYear(currentDate) ? 366 : 365;
+//                    remainingInterest = (currentDebt * rateValue * remainingDays) / (100 * daysInYear);
+//                }
+//            }
+//
+//            calculationStages.push({
+//                startDate: currentDate.toISOString().split('T')[0],
+//                endDate: endDateOnly.toISOString().split('T')[0],
+//                days: remainingDays,
+//                principal: currentDebt,
+//                interest: remainingInterest,
+//                dailyRate: remainingDays > 0 ? remainingInterest / (currentDebt * remainingDays) : 0,
+//                payment: null,
+//                daysMethod: overallDaysMethod,
+//                description: `Проценты на остаток долга: ${currentDebt.toFixed(2)} руб. за ${remainingDays} дней`
+//            });
+//
+//            totalInterest += remainingInterest;
+//        }
+//    }
+//
+//    // Применяем ограничение максимальной ставки
+//    let appliedMaxRate = null;
+//    if (maxRate && !isNaN(maxRate) && maxRate !== Infinity) {
+//        const maxInterest = debtAmount * (maxRate / 100);
+//        if (totalInterest > maxInterest) {
+//            const scaleFactor = maxInterest / totalInterest;
+//            calculationStages.forEach(stage => {
+//                if (stage.interest > 0) {
+//                    stage.interest = stage.interest * scaleFactor;
+//                }
+//            });
+//            totalInterest = maxInterest;
+//            appliedMaxRate = maxRate;
+//        }
+//    }
+//
+//    const totalPayments = getTotalPayments();
+//    const debtPayments = getDebtPayments();
+//    const penaltyPayments = getPenaltyPayments();
+//
+//    const amountToPay = Math.max(0, currentDebt + totalInterest - penaltyPayments);
+//
+//    return {
+//        debtAmount,
+//        startDate: startDate.toISOString().split('T')[0],
+//        endDate: endDate.toISOString().split('T')[0],
+//        days: totalDays,
+//        interestRate: `${rateValue}%${ratePeriod === 'month' ? ' (месячная)' : ratePeriod === 'day' ? ' (дневная)' : ' (годовая)'}`,
+//        interestRateType: 'fixed',
+//        interestRateValue: rateValue,
+//        cbrRatesUsed: null,
+//        dailyRate: calculateDailyRate('fixed', rateValue, ratePeriod, startDate, endDate, overallDaysMethod) * 100,
+//        interest: totalInterest,
+//        totalPayments,
+//        debtPayments,
+//        penaltyPayments,
+//        remainingDebt: currentDebt,
+//        totalDebt: currentDebt + totalInterest,
+//        amountToPay: amountToPay,
+//        maxRate: appliedMaxRate,
+//        calculationStages: calculationStages,
+//        daysMethod: overallDaysMethod,
+//        ratePeriod: ratePeriod
+//    };
+//}
+
+
 function calculateContractualInterest(debtAmount, startDate, endDate, rateValue, ratePeriod,
                                     payments, overallDaysMethod, intermediateDaysMethod, maxRate) {
 
-     let currentDebt = debtAmount;
-        let totalInterest = 0;
-        let currentDate = new Date(startDate);
-        const endDateOnly = new Date(endDate);
+    let currentDebt = debtAmount;
+    let totalInterest = 0;
+    let currentDate = new Date(startDate);
+    const endDateOnly = new Date(endDate);
 
-        // ОСНОВНОЕ ИЗМЕНЕНИЕ: для метода excludeStartIncludeEnd включаем конечный день
-        if (overallDaysMethod === 'excludeStartIncludeEnd') {
-            endDateOnly.setDate(endDateOnly.getDate() + 0); // Конечный день уже включен
+    // ОСНОВНОЕ ИЗМЕНЕНИЕ: для метода excludeStartIncludeEnd включаем конечный день
+    if (overallDaysMethod === 'excludeStartIncludeEnd') {
+        endDateOnly.setDate(endDateOnly.getDate() + 0); // Конечный день уже включен
+    }
+
+    const calculationStages = [];
+    const totalDays = calculateDaysBetween(currentDate, endDateOnly, overallDaysMethod);
+
+    // ОСНОВНОЕ ИСПРАВЛЕНИЕ: специальная обработка для годовой ставки с одинаковыми датами
+    if (ratePeriod === 'year' && startDate.getTime() === endDateOnly.getTime()) {
+        const daysInYear = isLeapYear(startDate) ? 366 : 365;
+        const dailyInterest = currentDebt * (rateValue / 100) / daysInYear;
+
+        calculationStages.push({
+            startDate: startDate.toISOString().split('T')[0],
+            endDate: endDateOnly.toISOString().split('T')[0],
+            days: 1,
+            principal: currentDebt,
+            interest: dailyInterest,
+            dailyRate: dailyInterest / currentDebt,
+            payment: null,
+            daysMethod: overallDaysMethod,
+            description: `Проценты на сумму ${currentDebt.toFixed(2)} руб. за 1 день`
+        });
+
+        totalInterest = dailyInterest;
+
+        // Применяем ограничение максимальной ставки
+        let appliedMaxRate = null;
+        if (maxRate && !isNaN(maxRate) && maxRate !== Infinity) {
+            const maxInterest = debtAmount * (maxRate / 100);
+            if (totalInterest > maxInterest) {
+                const scaleFactor = maxInterest / totalInterest;
+                calculationStages.forEach(stage => {
+                    if (stage.interest > 0) {
+                        stage.interest = stage.interest * scaleFactor;
+                    }
+                });
+                totalInterest = maxInterest;
+                appliedMaxRate = maxRate;
+            }
         }
 
-        const calculationStages = [];
-        const totalDays = calculateDaysBetween(currentDate, endDateOnly, overallDaysMethod);
+        const totalPayments = getTotalPayments();
+        const debtPayments = getDebtPayments();
+        const penaltyPayments = getPenaltyPayments();
+        const amountToPay = Math.max(0, currentDebt + totalInterest - penaltyPayments);
+
+        return {
+            debtAmount,
+            startDate: startDate.toISOString().split('T')[0],
+            endDate: endDateOnly.toISOString().split('T')[0],
+            days: 1,
+            interestRate: `${rateValue}% (годовая)`,
+            interestRateType: 'fixed',
+            interestRateValue: rateValue,
+            cbrRatesUsed: null,
+            dailyRate: ((rateValue / 100) / daysInYear) * 100,
+            interest: totalInterest,
+            totalPayments,
+            debtPayments,
+            penaltyPayments,
+            remainingDebt: currentDebt,
+            totalDebt: currentDebt + totalInterest,
+            amountToPay: amountToPay,
+            maxRate: appliedMaxRate,
+            calculationStages: calculationStages,
+            daysMethod: overallDaysMethod,
+            ratePeriod: ratePeriod
+        };
+    }
 
     // Для годовой ставки используем специальную логику расчета по годовщинам
     if (ratePeriod === 'year') {
@@ -651,11 +946,11 @@ function calculateContractualInterest(debtAmount, startDate, endDate, rateValue,
         if (paymentDateUTC > endDateOnly) break;
 
         if (overallDaysMethod === 'excludeStartIncludeEnd') {
-                // Не пропускаем платежи, даже если они в "начальный" день (который исключен)
-                if (paymentDateUTC < currentDate && paymentDateUTC.getTime() !== startDate.getTime()) continue;
-            } else {
-                if (paymentDateUTC < currentDate) continue;
-            }
+            // Не пропускаем платежи, даже если они в "начальный" день (который исключен)
+            if (paymentDateUTC < currentDate && paymentDateUTC.getTime() !== startDate.getTime()) continue;
+        } else {
+            if (paymentDateUTC < currentDate) continue;
+        }
 
         if (paymentDateUTC < currentDate) continue;
 
@@ -820,7 +1115,6 @@ function calculateContractualInterest(debtAmount, startDate, endDate, rateValue,
         ratePeriod: ratePeriod
     };
 }
-
 
 // ================== ФУНКЦИЯ РАСЧЕТА КЛЮЧЕВОЙ СТАВКИ ЦБ ==================
 
@@ -1037,37 +1331,58 @@ function getPenaltyPayments() {
 }
 
 function calculateMonthlyInterest(principal, rateValue, startDate, endDate, daysMethod) {
-    // Месячная ставка в десятичном виде
     const monthlyRate = rateValue / 100;
+    let totalInterest = 0;
+    let currentDate = new Date(startDate);
+    const end = new Date(endDate);
 
-    // Рассчитываем количество полных месяцев
-    const fullMonths = calculateFullMonthsBetween(startDate, endDate);
-
-    // Рассчитываем оставшиеся дни после полных месяцев
-    const remainingDays = calculateRemainingDaysAfterMonths(startDate, endDate, fullMonths);
-
-    // Проценты за полные месяцы
-    const interestForFullMonths = principal * monthlyRate * fullMonths;
-
-    // Проценты за оставшиеся дни (пропорционально)
-    let interestForRemainingDays = 0;
-    if (remainingDays > 0) {
-        // Находим дату после последнего полного месяца
-        const afterFullMonthsDate = addMonths(startDate, fullMonths);
-
-        // Количество дней в текущем месяце
-        const daysInCurrentMonth = getDaysInMonth(afterFullMonthsDate);
-
-        // Проценты за неполный месяц (пропорционально)
-        interestForRemainingDays = principal * monthlyRate * (remainingDays / daysInCurrentMonth);
+    // Для метода "исключая начальный, включая конечный" корректируем даты
+    if (daysMethod === 'excludeStartIncludeEnd') {
+        currentDate.setDate(currentDate.getDate() + 1); // Пропускаем начальный день
     }
 
-    return interestForFullMonths + interestForRemainingDays;
+    while (currentDate <= end) {
+        // Определяем конец текущего месяца
+        const monthEnd = calculateMonthlyPeriodEnd(currentDate);
+        const periodEnd = monthEnd > end ? new Date(end) : monthEnd;
+
+        // Рассчитываем дни в периоде с учетом метода расчета
+        let daysInPeriod;
+        if (daysMethod === 'excludeStartIncludeEnd') {
+            // Для этого метода уже учли сдвиг начальной даты
+            daysInPeriod = calculateDaysBetween(currentDate, periodEnd, 'includeStartExcludeEnd');
+        } else {
+            daysInPeriod = calculateDaysBetween(currentDate, periodEnd, daysMethod);
+        }
+
+        // Определяем количество дней в текущем месяце
+        const daysInCurrentMonth = getDaysInMonth(currentDate);
+
+        // Рассчитываем проценты за период
+        if (daysInPeriod === daysInCurrentMonth) {
+            // Полный месяц - применяем полную ставку
+            totalInterest += principal * monthlyRate;
+        } else {
+            // Частичный месяц - пропорциональный расчет
+            totalInterest += principal * monthlyRate * (daysInPeriod / daysInCurrentMonth);
+        }
+
+        // Переходим к следующему месяцу
+        currentDate = new Date(periodEnd);
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return totalInterest;
 }
 
 function calculateFullMonthsBetween(startDate, endDate) {
     const start = new Date(startDate);
     const end = new Date(endDate);
+
+    // Корректировка для метода "исключая начальный, включая конечный"
+    if (getDaysCalculationMethod() === 'excludeStartIncludeEnd') {
+        start.setDate(start.getDate() + 1); // Пропускаем начальный день
+    }
 
     let months = 0;
     let current = new Date(start);
@@ -1108,11 +1423,16 @@ function getDaysInMonth(date) {
 
 function calculateRemainingDaysAfterMonths(startDate, endDate, fullMonths) {
     if (fullMonths <= 0) {
-        return calculateDaysBetween(startDate, endDate, 'includeStartExcludeEnd');
+        return calculateDaysBetween(startDate, endDate, getDaysCalculationMethod());
     }
 
     // Находим дату после полных месяцев
-    const afterMonthsDate = addMonths(startDate, fullMonths);
+    let afterMonthsDate = addMonths(startDate, fullMonths);
+
+    // Корректировка для метода "исключая начальный, включая конечный"
+    if (getDaysCalculationMethod() === 'excludeStartIncludeEnd') {
+        afterMonthsDate.setDate(afterMonthsDate.getDate() + 1);
+    }
 
     // Если дата после месяцев превышает конечную дату, корректируем
     if (afterMonthsDate > endDate) {
@@ -1120,7 +1440,7 @@ function calculateRemainingDaysAfterMonths(startDate, endDate, fullMonths) {
     }
 
     // Рассчитываем оставшиеся дни
-    return calculateDaysBetween(afterMonthsDate, endDate, 'includeStartExcludeEnd');
+    return calculateDaysBetween(afterMonthsDate, endDate, getDaysCalculationMethod());
 }
 
 function addMonths(date, months) {
@@ -1173,6 +1493,107 @@ function calculateYearlyInterest(principal, rateValue, startDate, endDate, daysM
     return totalInterest;
 }
 
+//function calculateYearlyInterestByAnniversary(
+//    principal, rateValue, startDate, endDate, payments, daysMethod
+//) {
+//    const yearlyRate = rateValue / 100;
+//    let totalInterest = 0;
+//    let currentPrincipal = principal;
+//    const calculationStages = [];
+//    // Создаем отсортированный список всех значимых дат
+//    const significantDates = new Set();
+//    significantDates.add(startDate.getTime());
+//    significantDates.add(endDate.getTime());
+//    let currentAnniversary = getYearEndDate(startDate);
+//    while (currentAnniversary.getTime() < endDate.getTime()) {
+//        significantDates.add(currentAnniversary.getTime());
+//        currentAnniversary = getYearEndDate(currentAnniversary);
+//    }
+//    payments.forEach(p => {
+//        const pDate = parseDateWithoutTimezone(p.date);
+//        if (pDate >= startDate && pDate <= endDate) {
+//            significantDates.add(pDate.getTime());
+//        }
+//    });
+//    const sortedDates = Array.from(significantDates).sort((a, b) => a - b);
+//    let currentDate = new Date(startDate);
+//    for (const nextDateMs of sortedDates) {
+//        const nextDate = new Date(nextDateMs);
+//        if (currentDate.getTime() >= nextDate.getTime()) continue;
+//        if (currentDate.getTime() > endDate.getTime()) break;
+//        // Расчет процентов за текущий мини-период
+//        const periodEnd = nextDate;
+//        const daysInPeriod = calculateDaysBetween(currentDate, periodEnd, daysMethod);
+//        if (daysInPeriod > 0) {
+//            const isLeap = isLeapYear(currentDate);
+//            const daysInCurrentYear = isLeap ? 366 : 365;
+//            const periodInterest = currentPrincipal * yearlyRate * (daysInPeriod / daysInCurrentYear);
+//            totalInterest += periodInterest;
+//            calculationStages.push({
+//                startDate: currentDate.toISOString().split('T')[0],
+//                endDate: periodEnd.toISOString().split('T')[0],
+//                days: daysInPeriod,
+//                principal: currentPrincipal,
+//                interest: periodInterest,
+//                dailyRate: daysInPeriod > 0 ? periodInterest / (currentPrincipal * daysInPeriod) : 0,
+//                payment: null,
+//                daysMethod: daysMethod,
+//                description: `Проценты на сумму ${currentPrincipal.toFixed(2)} руб. за ${daysInPeriod} дней`
+//            });
+//        }
+//        // Применяем платежи, которые были в этот день
+//        const paymentsOnThisDate = payments.filter(p => {
+//            const pDate = parseDateWithoutTimezone(p.date);
+//            return pDate.getTime() === nextDate.getTime();
+//        });
+//        for (const payment of paymentsOnThisDate) {
+//            if (payment.destination === 'debt') {
+//                const debtBeforePayment = currentPrincipal;
+//                currentPrincipal = Math.max(0, currentPrincipal - payment.amount);
+//                calculationStages.push({
+//                    startDate: nextDate.toISOString().split('T')[0],
+//                    endDate: nextDate.toISOString().split('T')[0],
+//                    days: 0,
+//                    principal: debtBeforePayment,
+//                    interest: 0,
+//                    dailyRate: 0,
+//                    payment: {
+//                        date: payment.date,
+//                        amount: payment.amount,
+//                        destination: payment.destination
+//                    },
+//                    daysMethod: 'payment',
+//                    description: `Платеж: ${payment.amount.toFixed(2)} руб. Остаток долга: ${currentPrincipal.toFixed(2)} руб.`
+//                });
+//            } else if (payment.destination === 'penalty') {
+//                calculationStages.push({
+//                    startDate: nextDate.toISOString().split('T')[0],
+//                    endDate: nextDate.toISOString().split('T')[0],
+//                    days: 0,
+//                    principal: currentPrincipal,
+//                    interest: 0,
+//                    dailyRate: 0,
+//                    payment: {
+//                        date: payment.date,
+//                        amount: payment.amount,
+//                        destination: payment.destination
+//                    },
+//                    daysMethod: 'payment',
+//                    description: `Платеж в счет неустойки: ${payment.amount.toFixed(2)} руб.`
+//                });
+//            }
+//        }
+//        // Переходим к следующему дню
+//        currentDate = new Date(nextDate);
+//        currentDate.setUTCDate(currentDate.getUTCDate() + 1);
+//    }
+//    return {
+//        totalInterest,
+//        calculationStages,
+//        finalPrincipal: currentPrincipal
+//    };
+//}
+
 function calculateYearlyInterestByAnniversary(
     principal, rateValue, startDate, endDate, payments, daysMethod
 ) {
@@ -1180,35 +1601,70 @@ function calculateYearlyInterestByAnniversary(
     let totalInterest = 0;
     let currentPrincipal = principal;
     const calculationStages = [];
+
+    // ОСНОВНОЕ ИСПРАВЛЕНИЕ: обработка одинаковых дат
+    if (startDate.getTime() === endDate.getTime()) {
+        const daysInYear = isLeapYear(startDate) ? 366 : 365;
+        const dailyInterest = currentPrincipal * yearlyRate / daysInYear;
+
+        calculationStages.push({
+            startDate: startDate.toISOString().split('T')[0],
+            endDate: endDate.toISOString().split('T')[0],
+            days: 1, // 1 день вместо 0
+            principal: currentPrincipal,
+            interest: dailyInterest,
+            dailyRate: dailyInterest / currentPrincipal,
+            payment: null,
+            daysMethod: daysMethod,
+            description: `Проценты на сумму ${currentPrincipal.toFixed(2)} руб. за 1 день`
+        });
+
+        totalInterest = dailyInterest;
+
+        return {
+            totalInterest,
+            calculationStages,
+            finalPrincipal: currentPrincipal
+        };
+    }
+
     // Создаем отсортированный список всех значимых дат
     const significantDates = new Set();
     significantDates.add(startDate.getTime());
     significantDates.add(endDate.getTime());
+
+    // Остальной код функции без изменений...
     let currentAnniversary = getYearEndDate(startDate);
     while (currentAnniversary.getTime() < endDate.getTime()) {
         significantDates.add(currentAnniversary.getTime());
         currentAnniversary = getYearEndDate(currentAnniversary);
     }
+
     payments.forEach(p => {
         const pDate = parseDateWithoutTimezone(p.date);
         if (pDate >= startDate && pDate <= endDate) {
             significantDates.add(pDate.getTime());
         }
     });
+
     const sortedDates = Array.from(significantDates).sort((a, b) => a - b);
     let currentDate = new Date(startDate);
+
     for (const nextDateMs of sortedDates) {
         const nextDate = new Date(nextDateMs);
         if (currentDate.getTime() >= nextDate.getTime()) continue;
         if (currentDate.getTime() > endDate.getTime()) break;
+
         // Расчет процентов за текущий мини-период
         const periodEnd = nextDate;
         const daysInPeriod = calculateDaysBetween(currentDate, periodEnd, daysMethod);
+
         if (daysInPeriod > 0) {
             const isLeap = isLeapYear(currentDate);
             const daysInCurrentYear = isLeap ? 366 : 365;
             const periodInterest = currentPrincipal * yearlyRate * (daysInPeriod / daysInCurrentYear);
             totalInterest += periodInterest;
+
             calculationStages.push({
                 startDate: currentDate.toISOString().split('T')[0],
                 endDate: periodEnd.toISOString().split('T')[0],
@@ -1221,15 +1677,18 @@ function calculateYearlyInterestByAnniversary(
                 description: `Проценты на сумму ${currentPrincipal.toFixed(2)} руб. за ${daysInPeriod} дней`
             });
         }
+
         // Применяем платежи, которые были в этот день
         const paymentsOnThisDate = payments.filter(p => {
             const pDate = parseDateWithoutTimezone(p.date);
             return pDate.getTime() === nextDate.getTime();
         });
+
         for (const payment of paymentsOnThisDate) {
             if (payment.destination === 'debt') {
                 const debtBeforePayment = currentPrincipal;
                 currentPrincipal = Math.max(0, currentPrincipal - payment.amount);
+
                 calculationStages.push({
                     startDate: nextDate.toISOString().split('T')[0],
                     endDate: nextDate.toISOString().split('T')[0],
@@ -1263,10 +1722,12 @@ function calculateYearlyInterestByAnniversary(
                 });
             }
         }
+
         // Переходим к следующему дню
         currentDate = new Date(nextDate);
         currentDate.setUTCDate(currentDate.getUTCDate() + 1);
     }
+
     return {
         totalInterest,
         calculationStages,
@@ -1427,18 +1888,43 @@ function getCBRRatesForPeriod(startDate, endDate) {
     const end = new Date(endDate);
     const periods = getRatePeriods();
 
-    while (currentDate <= end) {
+    // Защита от бесконечного цикла
+    let safetyCounter = 0;
+    const MAX_ITERATIONS = 1000;
+
+    while (currentDate <= end && safetyCounter < MAX_ITERATIONS) {
+        safetyCounter++;
+
         const currentPeriod = periods.find(p =>
             currentDate >= p.start && currentDate <= p.end
         );
 
         if (!currentPeriod) {
+            // Если период не найден, пропускаем этот день
             currentDate.setDate(currentDate.getDate() + 1);
             continue;
         }
 
         const periodEndDate = new Date(Math.min(currentPeriod.end.getTime(), end.getTime()));
-        const daysInPeriod = calculateDaysBetween(currentDate, periodEndDate, 'includeStartExcludeEnd') + 1;
+
+        // Защита от одинаковых дат
+        if (currentDate.getTime() === periodEndDate.getTime()) {
+            rates.push({
+                startDate: new Date(currentDate),
+                endDate: new Date(periodEndDate),
+                rate: currentPeriod.rate,
+                days: 1 // Минимальное значение
+            });
+            break;
+        }
+
+        const daysInPeriod = calculateDaysBetween(currentDate, periodEndDate, 'includeStartExcludeEnd');
+
+        // Защита от отрицательного или нулевого количества дней
+        if (daysInPeriod <= 0) {
+            currentDate.setDate(currentDate.getDate() + 1);
+            continue;
+        }
 
         rates.push({
             startDate: new Date(currentDate),
@@ -1451,11 +1937,20 @@ function getCBRRatesForPeriod(startDate, endDate) {
         currentDate.setDate(currentDate.getDate() + 1);
     }
 
+    if (safetyCounter >= MAX_ITERATIONS) {
+        console.error('Превышено максимальное количество итераций в getCBRRatesForPeriod');
+    }
+
     return rates;
 }
 
 // Функция расчёта с ключевой ставкой ЦБ РФ с умножением на 2 (ст. 395 ГК РФ)
 function calculateCBRDoubleRate(startDate, endDate, daysMethod = 'includeStartExcludeEnd') {
+    // Защита от бесконечной рекурсии
+        if (startDate.getTime() === endDate.getTime()) {
+            return 0;
+        }
+
     let totalInterest = 0;
     const periods = getCBRRatesForPeriod(startDate, endDate);
 
@@ -1470,6 +1965,11 @@ function calculateCBRDoubleRate(startDate, endDate, daysMethod = 'includeStartEx
 
 // Функция расчёта с ключевой ставкой ЦБ РФ без умножения на 2
 function calculateCBRSingleRate(startDate, endDate, daysMethod = 'includeStartExcludeEnd') {
+    // Защита от бесконечной рекурсии
+            if (startDate.getTime() === endDate.getTime()) {
+                return 0;
+            }
+
     let totalInterest = 0;
     const periods = getCBRRatesForPeriod(startDate, endDate);
 
@@ -1526,71 +2026,6 @@ function calculateDailyRate(rateType, rateValue, ratePeriod, startDate, endDate,
             return rateValue / (100 * daysInYear); // в десятичном виде
     }
 }
-
-//function getNextRateChangeDate(currentDate) {
-//    const rateHistory = [
-//                { start: new Date('2025-07-28'), end: new Date('9999-12-31'), rate: 18.00 },
-//                { start: new Date('2025-06-09'), end: new Date('2025-07-27'), rate: 20.00 },
-//                { start: new Date('2024-10-28'), end: new Date('2025-06-08'), rate: 21.00 },
-//                { start: new Date('2024-09-16'), end: new Date('2024-10-27'), rate: 19.00 },
-//                { start: new Date('2024-07-29'), end: new Date('2024-09-15'), rate: 18.00 },
-//                { start: new Date('2023-12-18'), end: new Date('2024-07-28'), rate: 16.00 },
-//                { start: new Date('2023-10-30'), end: new Date('2023-12-17'), rate: 15.00 },
-//                { start: new Date('2023-09-18'), end: new Date('2023-10-29'), rate: 13.00 },
-//                { start: new Date('2023-08-15'), end: new Date('2023-09-17'), rate: 12.00 },
-//                { start: new Date('2023-07-24'), end: new Date('2023-08-14'), rate: 8.50 },
-//                { start: new Date('2022-09-19'), end: new Date('2023-07-23'), rate: 7.50 },
-//                { start: new Date('2022-07-25'), end: new Date('2022-09-18'), rate: 8.00 },
-//                { start: new Date('2022-06-14'), end: new Date('2022-07-24'), rate: 9.50 },
-//                { start: new Date('2022-05-27'), end: new Date('2022-06-13'), rate: 11.00 },
-//                { start: new Date('2022-05-04'), end: new Date('2022-05-26'), rate: 14.00 },
-//                { start: new Date('2022-04-11'), end: new Date('2022-05-03'), rate: 17.00 },
-//                { start: new Date('2022-02-28'), end: new Date('2022-04-10'), rate: 20.00 },
-//                { start: new Date('2022-02-14'), end: new Date('2022-02-27'), rate: 9.50 },
-//                { start: new Date('2021-12-20'), end: new Date('2022-02-13'), rate: 8.50 },
-//                { start: new Date('2021-10-25'), end: new Date('2021-12-19'), rate: 7.50 },
-//                { start: new Date('2021-09-13'), end: new Date('2021-10-24'), rate: 6.75 },
-//                { start: new Date('2021-07-26'), end: new Date('2021-09-12'), rate: 6.50 },
-//                { start: new Date('2021-06-15'), end: new Date('2021-07-25'), rate: 5.50 },
-//                { start: new Date('2021-04-26'), end: new Date('2021-06-14'), rate: 5.00 },
-//                { start: new Date('2021-03-22'), end: new Date('2021-04-25'), rate: 4.50 },
-//                { start: new Date('2020-07-27'), end: new Date('2021-03-21'), rate: 4.25 },
-//                { start: new Date('2020-06-22'), end: new Date('2020-07-26'), rate: 4.50 },
-//                { start: new Date('2020-04-27'), end: new Date('2020-06-21'), rate: 5.50 },
-//                { start: new Date('2020-02-10'), end: new Date('2020-04-26'), rate: 6.00 },
-//                { start: new Date('2019-12-16'), end: new Date('2020-02-09'), rate: 6.25 },
-//                { start: new Date('2019-10-28'), end: new Date('2019-12-15'), rate: 6.50 },
-//                { start: new Date('2019-09-09'), end: new Date('2019-10-27'), rate: 7.00 },
-//                { start: new Date('2019-07-29'), end: new Date('2019-09-08'), rate: 7.25 },
-//                { start: new Date('2019-06-17'), end: new Date('2019-07-28'), rate: 7.50 },
-//                { start: new Date('2018-12-17'), end: new Date('2019-06-16'), rate: 7.75 },
-//                { start: new Date('2018-09-17'), end: new Date('2018-12-16'), rate: 7.50 },
-//                { start: new Date('2018-03-26'), end: new Date('2018-09-16'), rate: 7.25 },
-//                { start: new Date('2018-02-12'), end: new Date('2018-03-25'), rate: 7.50 },
-//                { start: new Date('2017-12-18'), end: new Date('2018-02-11'), rate: 7.75 },
-//                { start: new Date('2017-10-30'), end: new Date('2017-12-17'), rate: 8.25 },
-//                { start: new Date('2017-09-18'), end: new Date('2017-10-29'), rate: 8.50 },
-//                { start: new Date('2017-06-19'), end: new Date('2017-09-17'), rate: 9.00 },
-//                { start: new Date('2017-05-02'), end: new Date('2017-06-18'), rate: 9.25 },
-//                { start: new Date('2017-03-27'), end: new Date('2017-05-01'), rate: 9.75 },
-//                { start: new Date('2016-09-19'), end: new Date('2017-03-26'), rate: 10.00 },
-//                { start: new Date('2016-08-01'), end: new Date('2016-09-18'), rate: 10.50 }
-//            ];
-//
-//    // Находим текущий период
-//    const currentPeriod = rateHistory.find(p =>
-//        currentDate >= p.start && currentDate <= p.end
-//    );
-//
-//    if (currentPeriod) {
-//        // Возвращаем дату окончания текущего периода + 1 день
-//        const nextDate = new Date(currentPeriod.end);
-//        nextDate.setDate(nextDate.getDate() + 1);
-//        return nextDate;
-//    }
-//
-//    return new Date('9999-12-31'); // По умолчанию
-//}
 
 function getNextRateChangeDate(currentDate) {
     // Используем глобальный массив CBR_RATE_HISTORY
@@ -1781,6 +2216,29 @@ function getDaysCalculationMethod() {
 }
 
 function calculateDaysBetween(startDate, endDate, method = 'includeStartExcludeEnd') {
+    // Проверка на некорректные даты
+    if (!startDate || !endDate || isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        console.error('Некорректные даты в calculateDaysBetween');
+        return 0;
+    }
+
+    // Проверка на одинаковые даты
+    if (startDate.getTime() === endDate.getTime()) {
+        switch (method) {
+            case 'includeBothDays': return 1;
+            case 'excludeBothDays': return 0;
+            case 'excludeStartIncludeEnd': return 0;
+            case 'includeStartExcludeEnd':
+            default: return 0;
+        }
+    }
+
+    // Проверка на обратный порядок дат
+    if (startDate > endDate) {
+        console.warn('calculateDaysBetween: начальная дата позже конечной');
+        return 0;
+    }
+
     // Преобразуем даты в UTC для точного расчета
     const startUTC = Date.UTC(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
     const endUTC = Date.UTC(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
@@ -1797,8 +2255,8 @@ function calculateDaysBetween(startDate, endDate, method = 'includeStartExcludeE
         case 'excludeBothDays':
             result = Math.max(0, baseDays - 1);
             break;
-        case 'excludeStartIncludeEnd': // НОВЫЙ ВАРИАНТ
-            result = baseDays + 1; // Исключаем начальный, но включаем конечный
+        case 'excludeStartIncludeEnd':
+            result = baseDays + 1;
             break;
         case 'includeStartExcludeEnd':
         default:
@@ -1991,99 +2449,6 @@ let isPrinting = false;
 
 // Объявляем переменную isExporting в начале файла
 let isExporting = false;
-
-
-//async function exportToDOCX() {
-//    if (isExporting) return;
-//    isExporting = true;
-//
-//    const resultsContainer = document.querySelector('.results-container');
-//    if (!resultsContainer || resultsContainer.innerHTML.trim() === '') {
-//        alert('Сначала выполните расчет для экспорта');
-//        isExporting = false;
-//        return;
-//    }
-//
-//    // Проверяем, есть ли таблица в результатах
-//    const hasTable = resultsContainer.querySelector('table');
-//
-//    // Проверяем состояние переключателей формата (если они есть)
-//    const tableViewRadio = document.getElementById('table-view');
-//    const textViewRadio = document.getElementById('text-view');
-//
-//    let shouldShowAlert = false;
-//
-//    // Если есть переключатели, проверяем их состояние
-//    if (tableViewRadio && textViewRadio) {
-//        if (textViewRadio.checked) {
-//            shouldShowAlert = true;
-//        }
-//    }
-//    // Если переключателей нет, но нет и таблицы - тоже показываем alert
-//    else if (!hasTable) {
-//        shouldShowAlert = true;
-//    }
-//
-//    if (shouldShowAlert) {
-//        alert('Для экспорта расчёта в DOCX файл выберите вид расчёта в виде таблицы');
-//        isExporting = false;
-//        return;
-//    }
-//
-//    try {
-//        showLoadingIndicator('Подготовка DOCX...');
-//
-//        // Динамически загружаем библиотеку
-//        await loadScript('https://cdn.jsdelivr.net/npm/docx@7.8.0/build/index.js');
-//
-//        const { Document, Paragraph, HeadingLevel, AlignmentType, Table, TableRow, TableCell, WidthType } = window.docx;
-//
-//        // Создаем структурированный документ
-//        const docElements = [
-//            new Paragraph({
-//                text: "Расчет задолженности",
-//                heading: HeadingLevel.HEADING_1,
-//                alignment: AlignmentType.CENTER,
-//            }),
-//
-//            new Paragraph({
-//                text: `Дата формирования: ${new Date().toLocaleDateString()}`,
-//            }),
-//
-//            new Paragraph({ text: "" }) // Пустая строка
-//        ];
-//
-//        // Обрабатываем содержимое results-container
-//        processContainerContent(resultsContainer, docElements);
-//
-//        // Добавляем подвал
-//        docElements.push(
-//            new Paragraph({ text: "" }),
-//            new Paragraph({
-//                text: `Сгенерировано: ${new Date().toLocaleString()}`,
-//                alignment: AlignmentType.RIGHT,
-//            })
-//        );
-//
-//        // Создаем документ
-//        const doc = new Document({
-//            sections: [{ children: docElements }]
-//        });
-//
-//        // Генерируем и скачиваем
-//        const blob = await window.docx.Packer.toBlob(doc);
-//        downloadFile(blob, `calculation_${new Date().toISOString().slice(0,10)}.docx`);
-//
-//        hideLoadingIndicator();
-//        isExporting = false;
-//
-//    } catch (error) {
-//        console.error('DOCX export error:', error);
-//        alert('Ошибка генерации: ' + error.message);
-//        hideLoadingIndicator();
-//        isExporting = false;
-//    }
-//}
 
 async function exportToDOCX() {
     if (isExporting) return;
@@ -3490,9 +3855,28 @@ function generateMonthlyPeriods(startDate, endDate, calculationStages, overallDa
     let currentDate = new Date(startDate);
     const end = new Date(endDate);
 
-    while (currentDate <= end) {
+    // Защита от бесконечного цикла
+    let safetyCounter = 0;
+    const MAX_ITERATIONS = 1000;
+
+    while (currentDate <= end && safetyCounter < MAX_ITERATIONS) {
+        safetyCounter++;
+
         let periodEnd = calculateMonthlyPeriodEnd(currentDate);
         const actualEnd = periodEnd > end ? new Date(end) : periodEnd;
+
+        // Проверка на одинаковые даты
+        if (currentDate.getTime() === actualEnd.getTime()) {
+            // Добавляем минимальный период и выходим
+            periods.push({
+                startDate: formatDateToYYYYMMDD(currentDate),
+                endDate: formatDateToYYYYMMDD(actualEnd),
+                days: 1,
+                payments: [],
+                isFullMonth: false
+            });
+            break;
+        }
 
         // Получаем платежи для этого периода
         const paymentsInPeriod = getPaymentsInPeriod(currentDate, actualEnd, calculationStages);
@@ -3515,23 +3899,39 @@ function generateMonthlyPeriods(startDate, endDate, calculationStages, overallDa
             }
         }
 
-        // Переход к следующему периоду
+        // Безопасный переход к следующему периоду
         if (overallDaysMethod === 'excludeStartIncludeEnd') {
             currentDate = new Date(actualEnd);
         } else {
-            currentDate = new Date(actualEnd);
-            currentDate.setDate(currentDate.getDate() + 1);
+            const nextDate = new Date(actualEnd);
+            nextDate.setDate(nextDate.getDate() + 1);
+
+            // Проверка, не превысили ли мы конечную дату
+            if (nextDate > end) {
+                break;
+            }
+            currentDate = nextDate;
         }
+    }
+
+    if (safetyCounter >= MAX_ITERATIONS) {
+        console.error('Превышено максимальное количество итераций в generateMonthlyPeriods');
     }
 
     return periods;
 }
 
-function calculateMonthlyPeriodEnd(startDate) {
-    const result = new Date(startDate);
+function calculateMonthlyPeriodEnd(date) {
+    const result = new Date(date);
     // Устанавливаем следующий месяц и 0 день (последний день текущего месяца)
     result.setMonth(result.getMonth() + 1);
     result.setDate(0);
+
+    // Для метода "исключая начальный, включая конечный" корректируем
+    if (getDaysCalculationMethod() === 'excludeStartIncludeEnd') {
+        result.setDate(result.getDate() + 1); // Включаем конечный день
+    }
+
     return result;
 }
 
@@ -3634,6 +4034,10 @@ function splitPeriodByPayments(startDate, endDate, payments, overallDaysMethod) 
     let currentDate = new Date(startDate);
     const end = new Date(endDate);
 
+    // Защита от бесконечного цикла
+    let safetyCounter = 0;
+    const MAX_ITERATIONS = 100;
+
     // Сортируем платежи по дате
     const sortedPayments = payments
         .filter(payment => {
@@ -3644,15 +4048,16 @@ function splitPeriodByPayments(startDate, endDate, payments, overallDaysMethod) 
 
     let paymentIndex = 0;
 
-    while (currentDate <= end && paymentIndex < sortedPayments.length) {
+    while (currentDate <= end && paymentIndex < sortedPayments.length && safetyCounter < MAX_ITERATIONS) {
+        safetyCounter++;
+
         const payment = sortedPayments[paymentIndex];
         const paymentDate = new Date(payment.date);
 
-        // Период ДО платежа (включая день платежа)
+        // Период ДО платежа
         if (paymentDate > currentDate) {
             const periodEnd = new Date(paymentDate);
-            //const daysBeforePayment = calculateDaysBetween(currentDate, periodEnd, 'includeStartIncludeEnd');
-            const daysBeforePayment = calculateInclusiveDaysBetween(currentDate, periodEnd);
+            const daysBeforePayment = calculateDaysBetween(currentDate, periodEnd, 'includeStartExcludeEnd');
 
             if (daysBeforePayment > 0) {
                 periods.push({
@@ -3695,6 +4100,10 @@ function splitPeriodByPayments(startDate, endDate, payments, overallDaysMethod) 
                 payments: []
             });
         }
+    }
+
+    if (safetyCounter >= MAX_ITERATIONS) {
+        console.error('Превышено максимальное количество итераций в splitPeriodByPayments');
     }
 
     return periods;
@@ -3811,6 +4220,127 @@ function createTableView(data) {
 `;
 }
 
+// ================== ФУНКЦИОНАЛ КНОПКИ "ПОЛЕЗНАЯ ИНФОРМАЦИЯ" ==================
+
+// Функция для создания и управления модальным окном
+function setupInfoButton() {
+    // Находим кнопку по ID
+    const infoBtn = document.getElementById('infoBtn');
+
+    if (!infoBtn) {
+        console.error('Кнопка infoBtn не найдена!');
+        return;
+    }
+
+    // Создаем модальное окно
+    const modal = document.createElement('div');
+    modal.id = 'infoModal';
+    modal.style.cssText = `
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.7);
+        z-index: 1001;
+        justify-content: center;
+        align-items: center;
+    `;
+
+    // Новый HTML-контент для модального окна с прокруткой только для внутреннего блока
+    modal.innerHTML = `
+        <div style="background: white; padding: 30px; border-radius: 10px; max-width: 800px; max-height: 90%; text-align: left; color: #333; line-height: 1.6; margin: 20px; overflow-y: auto;">
+            <h3 style="margin-top: 0; color: #2c3e50; text-align: center; font-size: 24px;">Инструкция по работе с калькулятором ✍️</h3>
+            <div style="margin-top: 20px; font-size: 16px;">
+                <p>Добро пожаловать! 👋 Перед началом расчётов, пожалуйста, ознакомьтесь с основными возможностями и особенностями калькулятора.</p>
+
+                <h4>📊 Виды процентных ставок</h4>
+                <p>Калькулятор поддерживает три вида ставок:</p>
+                <ol>
+                    <li><b>Договорная ставка</b> — величина, определённая сторонами в договоре.</li>
+                    <li><b>Ключевая ставка Центрального Банка России (ЦБ РФ)</b> — официальная ставка.</li>
+                    <li><b>Ключевая ставка ЦБ РФ * 2</b> — минимальный размер имущественных потерь кредитора, который сложился в судебной практике  (см., например, определение определение Верховного Суда Российской Федерации от 22.11.2022 N 305-ЭС22-10240, а также пункт 2 Постановления Пленума ВАС РФ от 22.12.2011 N 81).</li>
+                </ol>
+
+                <h4>📝 Ограничение максимального размера</h4>
+                <p>Закон или договор могут ограничивать максимальный размер процентов или неустойки. Если это ваш случай, укажите соответствующий максимальный размер в процентах в разделе <b>"Максимальный размер процентов"</b>. 🚧</p>
+
+                <h4>💰 Учёт частичных оплат</h4>
+                <p>Калькулятор позволяет учитывать частичные погашения задолженности. Для этого в разделе <b>"Частичные оплаты"</b> укажите дату и сумму платежа. Частичная оплата уменьшает общую сумму задолженности, начиная со следующего дня после дня внесения соответствующего платежа. Корректировка размера задолженности в сторону её уменьшения может быть произведена неоднократно. Обратите внимание: частичное погашение неустойки не уменьшает основную задолженность. ❗️</p>
+
+                <h4>📅 Методики расчёта</h4>
+                <p>Расчёт производится в календарных днях (365 или 366 дней в високосном году). 🗓️</p>
+
+                <h4>⏰ Порядок определения периода расчёта</h4>
+                <p>Согласно статье 191 ГК РФ, течение срока начинается на следующий день после наступления события. Например, при заключении договора 31.10.2024, начисление процентов начнётся 01.11.2024. В разделе <b>"Учёт дней расчёта"</b> вы можете выбрать, включать или исключать начальный и конечный дни. Это важно для точности! ✅</p>
+
+                <h4>🖨️ Вид расчёта и действия с результатами</h4>
+                <p>Вы можете представить результаты расчёта в виде <b>списка</b> или <b>таблицы</b>. После этого, результат можно:</p>
+                <ul>
+                    <li>Распечатать. 🖨️</li>
+                    <li>Скопировать в буфер обмена. 📋</li>
+                    <li>Сформировать и скачать в формате DOCX. 📄</li>
+                </ul>
+                <p>Выберите нужную кнопку внизу экрана, чтобы совершить одно из этих действий.</p>
+            </div>
+            <button id="closeModal" style="display: block; margin: 30px auto 0; padding: 12px 24px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 18px;">
+                Понятно, закрыть
+            </button>
+        </div>
+    `;
+
+    // Добавляем модальное окно в body
+    document.body.appendChild(modal);
+
+    // Функции для показа/скрытия модального окна
+    function showModal() {
+        modal.style.display = 'flex';
+    }
+
+    function hideModal() {
+        modal.style.display = 'none';
+    }
+
+    // Назначаем обработчики событий
+    infoBtn.addEventListener('click', showModal);
+
+    // Закрытие по кнопке
+    document.addEventListener('click', function(event) {
+        if (event.target.id === 'closeModal') {
+            hideModal();
+        }
+    });
+
+    // Закрытие по клику на фон
+    modal.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            hideModal();
+        }
+    });
+
+    // Закрытие по клавише Esc
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape' && modal.style.display === 'flex') {
+            hideModal();
+        }
+    });
+
+    console.log('Кнопка infoBtn инициализирована успешно!');
+}
+
+// Запускаем инициализацию после загрузки DOM
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM загружен, инициализируем кнопку...');
+    setupInfoButton();
+});
+
+// Резервная инициализация на случай, если DOM уже загружен
+if (document.readyState !== 'loading') {
+    console.log('DOM уже загружен, запускаем сразу...');
+    setTimeout(setupInfoButton, 100);
+}
+
 // ================== Функции управления формой ==================
 
 function clearForm(elements) {
@@ -3867,31 +4397,6 @@ function copyResults() {
 }
 
 // ================== Инициализация при загрузке ==================
-
-//function initCalculator() {
-//    // Очистка при уходе со страницы
-//    window.addEventListener('beforeunload', () => {
-//        domObservers.forEach(observer => observer.disconnect());
-//        domObservers.length = 0;
-//        calculatorInitialized = false;
-//    });
-//
-//    // Пытаемся инициализировать сразу
-//    if (document.readyState === 'complete') {
-//        setTimeout(initializeCalculator, 0);
-//    } else {
-//        document.addEventListener('DOMContentLoaded', () => {
-//            setTimeout(initializeCalculator, 100);
-//        });
-//    }
-//
-//    // Резервная инициализация через 2 секунды
-//    setTimeout(() => {
-//        if (!calculatorInitialized) {
-//            initializeCalculator();
-//        }
-//    }, 2000);
-//}
 
 function initCalculator() {
     // Очистка при уходе со страницы
@@ -3958,6 +4463,26 @@ function testFullMonthDetection() {
         console.log(`Result: ${result}, Expected: ${expected}, ${result === expected ? '✓' : '✗'}`);
         console.log('---');
     });
+}
+
+//Проверка правильности расчёта, исходя из ствки % годовых за 1 день
+function testYearlyRateSameDate() {
+    console.log('=== ТЕСТ ГОДОВОЙ СТАВКИ С ОДИНАКОВЫМИ ДАТАМИ ===');
+
+    const testDate = new Date('2024-06-01');
+    const principal = 1000;
+    const rate = 10; // 10% годовых
+
+    // Тестируем напрямую функцию расчета
+    const result = calculateYearlyInterestByAnniversary(
+        principal, rate, testDate, testDate, [], 'includeStartExcludeEnd'
+    );
+
+    console.log('Сумма:', principal);
+    console.log('Ставка:', rate + '% годовых');
+    console.log('Период: 1 день');
+    console.log('Начисленные проценты:', result.totalInterest.toFixed(4));
+    console.log('Этапы расчета:', result.calculationStages);
 }
 
 function debugDaysCalculation() {

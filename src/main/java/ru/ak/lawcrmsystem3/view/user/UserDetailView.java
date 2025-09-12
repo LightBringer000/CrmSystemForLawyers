@@ -6,6 +6,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.router.Route;
+import io.jmix.core.DataManager;
 import io.jmix.core.EntityStates;
 import io.jmix.core.MessageTools;
 import io.jmix.core.security.CurrentAuthentication;
@@ -22,6 +23,7 @@ import ru.ak.lawcrmsystem3.view.main.MainView;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.TimeZone;
 
 @Route(value = "users/:id", layout = MainView.class)
@@ -53,6 +55,8 @@ public class UserDetailView extends StandardDetailView<User> {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private UserService userService;
+    @Autowired
+    private DataManager dataManager;
 
     @Subscribe
     public void onInit(final InitEvent event) {
@@ -114,9 +118,20 @@ public class UserDetailView extends StandardDetailView<User> {
         }
 
         // Проверка уникальности username
-        User savedUser = userService.saveUser(getEditedEntity());
-        if (savedUser == null) {
-            event.getErrors().add(messageBundle.getMessage("userNotSaved"));
+//        User savedUser = userService.saveUser(getEditedEntity());
+//        if (savedUser == null) {
+//            event.getErrors().add(messageBundle.getMessage("userNotSaved"));
+//        }
+        // Проверка уникальности username БЕЗ СОХРАНЕНИЯ
+        if (getEditedEntity().getUsername() != null && !getEditedEntity().getUsername().isEmpty()) {
+            Optional<User> existingUser = dataManager.load(User.class)
+                    .query("SELECT u FROM User u WHERE u.username = :username")
+                    .parameter("username", getEditedEntity().getUsername())
+                    .optional();
+
+            if (existingUser.isPresent() && !existingUser.get().getId().equals(getEditedEntity().getId())) {
+                event.getErrors().add(messageBundle.getMessage("userWithUsernameExists"));
+            }
         }
     }
 

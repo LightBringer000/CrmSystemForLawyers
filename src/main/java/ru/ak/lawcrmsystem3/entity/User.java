@@ -61,14 +61,17 @@ public class User implements JmixUserDetails, HasTimeZone {
             inverseJoinColumns = @JoinColumn(name = "DEAL_ID", referencedColumnName = "ID"))
     @ManyToMany
     private Set<Deal> deals;
+
     @OrderBy("ASC")
     @OneToMany(mappedBy = "user")
     private List<Event> events;
+
     @JoinTable(name = "TASK_USER_LINK",
             joinColumns = @JoinColumn(name = "USER_ID", referencedColumnName = "ID"),
             inverseJoinColumns = @JoinColumn(name = "TASK_ID", referencedColumnName = "ID"))
     @ManyToMany
     private Set<Task> tasks;
+
     @Transient
     private Collection<? extends GrantedAuthority> authorities;
 
