@@ -9,7 +9,9 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.page.Page;
+import com.vaadin.flow.router.Location;
 import com.vaadin.flow.router.Route; // Для Vaadin Flow
+import com.vaadin.flow.router.Router;
 import com.vaadin.flow.server.StreamResource;
 import io.jmix.core.DataManager;
 import io.jmix.email.EmailException;
@@ -38,13 +40,13 @@ import ru.ak.lawcrmsystem3.view.main.MainView;
 @Route(value = "EmailListView", layout = MainView.class)
 @ViewController(id = "EmailListView")
 @ViewDescriptor(path = "email-list-view.xml")
-public class EmailListView extends StandardView  {
+public class EmailListView extends StandardView{
 
     private static final Logger log = LoggerFactory.getLogger(EmailListView.class);
 
     private final EmailReceiverService emailReceiverService;
     private final ObjectMapper objectMapper; // Добавляем ObjectMapper для сериализации в JSON
-   
+
 
     @Autowired
     private DataManager dataManager;
@@ -187,17 +189,15 @@ public class EmailListView extends StandardView  {
     }
 
 
-@ClientCallable
-public String downloadAttachment(long emailUid, String attachmentName) {
-    try {
-        byte[] attachmentData = emailReceiverService.downloadAttachment(emailUid, attachmentName);
-        return attachmentData != null ? Base64.getEncoder().encodeToString(attachmentData) : null;
-    } catch (Exception e) {
-        log.error("Error downloading attachment", e);
-        return null;
+    @ClientCallable
+    public String downloadAttachment(long emailUid, String attachmentName) {
+        try {
+            byte[] attachmentData = emailReceiverService.downloadAttachment(emailUid, attachmentName);
+            return attachmentData != null ? Base64.getEncoder().encodeToString(attachmentData) : null;
+        } catch (Exception e) {
+            log.error("Error downloading attachment", e);
+            return null;
+        }
     }
-}
-
-
 
 }

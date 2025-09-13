@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jmix.core.DataManager;
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
+import jakarta.mail.search.FlagTerm;
+import jakarta.mail.search.SearchTerm;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -58,6 +60,77 @@ public class EmailReceiverService {
     public List<ReceivedEmail> receiveNewEmails() {
         log.info("Attempting to receive new emails");
         return receiveEmailsSince(null);
+    }
+
+    //Метод для поиска только непрочитанных писем
+    public List<ReceivedEmail> receiveUnreadEmails() {
+        log.info("Attempting to receive unread emails");
+        List<ReceivedEmail> emails = new ArrayList<>();
+        Store store = null;
+        IMAPFolder inbox = null;
+
+        try {
+            // 1. Настройка свойств для подключения
+            Properties props = new Properties();
+            props.put("mail.store.protocol", protocol);
+            props.put("mail." + protocol + ".port", String.valueOf(port));
+            props.put("mail." + protocol + ".ssl.enable", "true");
+            props.put("mail." + protocol + ".timeout", "10000");
+            props.put("mail." + protocol + ".connectiontimeout", "10000");
+
+            // 2. Создание сессии и подключение к серверу
+            Session session = Session.getInstance(props);
+            store = session.getStore();
+            store.connect(host, port, username, password);
+
+            // 3. Открытие папки "INBOX"
+            inbox = (IMAPFolder) store.getFolder("INBOX");
+            inbox.open(Folder.READ_ONLY);
+
+            // 4. Поиск непрочитанных сообщений
+            SearchTerm unreadMessages = new FlagTerm(new Flags(Flags.Flag.SEEN), false);
+            Message[] messages = inbox.search(unreadMessages);
+
+            // 5. Обработка найденных сообщений
+            for (Message message : messages) {
+                try {
+                    // Конвертация сообщения в наш объект ReceivedEmail
+                    ReceivedEmail email = convertToReceivedEmail(message);
+
+                    // Определение уникального идентификатора письма (UID или хэш)
+                    if (inbox instanceof UIDFolder) {
+                        long uid = ((UIDFolder) inbox).getUID(message);
+                        email.setUid(String.valueOf(uid));
+                    } else {
+                        email.setUid(generateEmailHash(message));
+                    }
+
+                    emails.add(email);
+                } catch (Exception e) {
+                    log.error("Error processing unread message with subject: {}", getSubjectSafe(message), e);
+                }
+            }
+
+            // 6. Закрытие папки и хранилища
+            inbox.close(false);
+            store.close();
+
+        } catch (Exception e) {
+            log.error("Error receiving unread emails: {}", e.getMessage(), e);
+        } finally {
+            // 7. Обеспечение закрытия ресурсов в любом случае
+            try {
+                if (inbox != null && inbox.isOpen()) {
+                    inbox.close(false);
+                }
+                if (store != null && store.isConnected()) {
+                    store.close();
+                }
+            } catch (MessagingException e) {
+                log.warn("Error closing resources", e);
+            }
+        }
+        return emails;
     }
 
     public List<ReceivedEmail> receiveEmailsSince(Date sinceDate) {

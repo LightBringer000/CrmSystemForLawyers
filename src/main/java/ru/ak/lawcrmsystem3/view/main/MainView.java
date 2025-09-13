@@ -1,132 +1,68 @@
 package ru.ak.lawcrmsystem3.view.main;
 
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.ClickEvent;
-import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.shared.Registration;
-import io.jmix.core.DataManager;
-import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.app.main.StandardMainView;
-import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.Subscribe;
-import io.jmix.flowui.view.ViewComponent;
 import io.jmix.flowui.view.ViewController;
 import io.jmix.flowui.view.ViewDescriptor;
-import io.jmix.flowui.view.navigation.ViewNavigationSupport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import ru.ak.lawcrmsystem3.app.SchedulerService;
-import ru.ak.lawcrmsystem3.entity.Task;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 @Route("")
 @ViewController(id = "MainView")
 @ViewDescriptor(path = "main-view.xml")
 public class MainView extends StandardMainView {
-//
-//    @Autowired
-//    private SchedulerService schedulerService;
-//
-//    @Autowired
-//    private ViewNavigationSupport viewNavigationSupport;
-//
-//    @ViewComponent
-//    private Button tasksButton;
-//
-//    @Subscribe
-//    public void onInit(final InitEvent event) {
-//        long count = schedulerService.getIncompleteTasksCount();
-//        updateTasksButton(count);
-//    }
-//
-//    @Scheduled(fixedRate = 30000)
-//    public void checkIncompleteTasks() {
-//        getUI().ifPresent(ui -> ui.access(() -> {
-//            long count = schedulerService.getIncompleteTasksCount();
-//            updateTasksButton(count);
-//        }));
-//    }
-//
-//    public void updateTasksButton(long count) {
-//        tasksButton.setVisible(count > 0);
-//        if (count > 0) {
-//            tasksButton.setText(String.format("У вас %d незавершённых задач", count));
-//        } else {
-//            tasksButton.setText("");
-//        }
-//    }
-//
-//    @Subscribe("tasksButton")
-//    public void onTasksButtonClick(final ClickEvent<JmixButton> event) {
-//        viewNavigationSupport.navigate("Task_.list");
-//    }
-//
+
+    private final Logger log = LoggerFactory.getLogger(MainView.class);
+
 
     @Autowired
     private SchedulerService schedulerService;
 
-    @Autowired
-    private ViewNavigationSupport viewNavigationSupport;
-
-    @ViewComponent
-    private Button tasksButton;
-
-    private ScheduledExecutorService executor;
-    private Registration detachRegistration;
-
     @Subscribe
-    public void onInit(final InitEvent event) {
-        // Начальный подсчёт при создании представления
-        long count = schedulerService.getIncompleteTasksCount();
-        updateTasksButton(count);
+    public void onBeforeShow(BeforeShowEvent event) {
+        // Добавляем Font Awesome через JavaScript
+        UI.getCurrent().getPage().executeJs("""
+            // Проверяем, не добавлен ли уже Font Awesome
+            if (!document.querySelector('link[href*=\"font-awesome\"]')) {
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css';
+                link.integrity = 'sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==';
+                link.crossOrigin = 'anonymous';
+                link.referrerPolicy = 'no-referrer';
+                document.head.appendChild(link);
+            }
+        """);
+
+        // Загружаем наш скрипт
+        UI.getCurrent().getPage().addJavaScript("/js/tasks-notification.js");
+        UI.getCurrent().getPage().addJavaScript("/js/events-notification.js");
+        UI.getCurrent().getPage().addJavaScript("/js/emails-notification.js");
     }
 
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        UI ui = attachEvent.getUI();
+//    @ClientCallable
+//    public int getUpcomingEventsCount() {
+//        try {
+//            return (int) schedulerService.getUpcomingEventsCount();
+//        } catch (Exception e) {
+//            log.error("Error getting upcoming events count", e);
+//            return 0;
+//        }
+//    }
 
-        executor = Executors.newSingleThreadScheduledExecutor();
-        executor.scheduleAtFixedRate(() -> {
-            ui.access(() -> {
-                long count = schedulerService.getIncompleteTasksCount();
-                updateTasksButton(count);
-            });
-        }, 0, 30, TimeUnit.SECONDS);
-
-        detachRegistration = ui.addDetachListener(detachEvent -> {
-            executor.shutdown();
-        });
-    }
-
-    @Override
-    protected void onDetach(DetachEvent detachEvent) {
-        super.onDetach(detachEvent);
-        if (executor != null && !executor.isShutdown()) {
-            executor.shutdown();
+    @ClientCallable
+    public int getUnreadEmailsCount() {
+        try {
+            return (int) schedulerService.getUnreadEmailsCount();
+        } catch (Exception e) {
+            log.error("Error getting unread emails count", e);
+            return 0;
         }
-        if (detachRegistration != null) {
-            detachRegistration.remove();
-        }
-    }
-
-    public void updateTasksButton(long count) {
-        tasksButton.setVisible(count > 0);
-        if (count > 0) {
-            tasksButton.setText(String.format("У вас %d незавершённых задач", count));
-        } else {
-            tasksButton.setText("");
-        }
-    }
-
-    @Subscribe("tasksButton")
-    public void onTasksButtonClick(final ClickEvent<JmixButton> event) {
-        viewNavigationSupport.navigate("Task_.list");
     }
 }

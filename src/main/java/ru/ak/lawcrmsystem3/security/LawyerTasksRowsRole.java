@@ -22,35 +22,6 @@ public interface LawyerTasksRowsRole {
 
     String CODE = "lawyer-tasks-rows-role";
 
-//    @JpqlRowLevelPolicy(
-//            entityClass = Task.class,
-//            join = "join {E}.responsibleLawyers rl",
-//            where = "rl.username = :current_user_username")
-//    void taskJpql();
-
-//
-//    @PredicateRowLevelPolicy(entityClass = Task.class,
-//            actions = {RowLevelPolicyAction.READ})
-//    default RowLevelBiPredicate<Task, ApplicationContext> taskPredicate() {
-//        return (task, applicationContext) -> {
-//            CurrentAuthentication currentAuthentication = applicationContext.getBean(CurrentAuthentication.class);
-//            log.info("Applying predicate row-level policy for tasks.");
-//
-//            if (currentAuthentication.isSet()) {
-//                Object user = currentAuthentication.getUser();
-//                log.info("Authentication is set. Current user: {}", user);
-//                if (user instanceof User) {
-//                    User currentUser = (User) user;
-//                    log.info("User is an instance of 'User'. Filtering tasks for user: {}", currentUser.getUsername());
-//                    return task.getResponsibleLawyers().contains(currentUser);
-//                }
-//            } else {
-//                log.info("Authentication is not set. Hiding all tasks.");
-//            }
-//            return false;
-//        };
-//    }
-
     @PredicateRowLevelPolicy(entityClass = Task.class,
             actions = {RowLevelPolicyAction.READ})
     default RowLevelBiPredicate<Task, ApplicationContext> taskPredicate() {

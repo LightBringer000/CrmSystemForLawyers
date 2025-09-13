@@ -1,8 +1,8 @@
 // Глобальные переменные состояния
 let calculatorInitialized = false;
 let notificationTimeout = null;
-let initializationAttempts = 0;
-const MAX_INIT_ATTEMPTS = 10;
+let initializationCalculatorAttempts = 0;
+const MAX_INIT_CALCULATOR_ATTEMPTS = 10;
 const domObservers = [];
 const rateCache = new Map();
 const ratePeriodsCache = new Map();
@@ -59,13 +59,13 @@ const CBR_RATE_HISTORY = [
 
 function initializeCalculator() {
     if (calculatorInitialized) return;
-    if (initializationAttempts >= MAX_INIT_ATTEMPTS) {
+    if (initializationCalculatorAttempts >= MAX_INIT_CALCULATOR_ATTEMPTS) {
         console.error('Max initialization attempts reached');
         return;
     }
 
-    initializationAttempts++;
-    console.log(`Initializing calculator (attempt ${initializationAttempts})`);
+    initializationCalculatorAttempts++;
+    console.log(`Initializing calculator (attempt ${initializationCalculatorAttempts})`);
 
     try {
         // Проверяем наличие всех необходимых элементов
@@ -81,14 +81,14 @@ function initializeCalculator() {
         setupDOMObservers();
 
         calculatorInitialized = true;
-        initializationAttempts = 0;
+        initializationCalculatorAttempts = 0;
         console.log('Calculator initialized successfully');
 
     } catch (error) {
         console.error('Calculator initialization error:', error);
 
         // Повторная попытка через 500ms
-        if (initializationAttempts < MAX_INIT_ATTEMPTS) {
+        if (initializationCalculatorAttempts < MAX_INIT_CALCULATOR_ATTEMPTS) {
             setTimeout(() => initializeCalculator(), 500);
         }
     }
@@ -4404,7 +4404,7 @@ function initCalculator() {
         domObservers.forEach(observer => observer.disconnect());
         domObservers.length = 0;
         calculatorInitialized = false;
-        initializationAttempts = 0;
+        initializationCalculatorAttempts = 0;
     });
 
     // Отслеживаем возврат на страницу
@@ -4516,7 +4516,7 @@ window.addEventListener('beforeunload', () => {
     // Сбрасываем флаги инициализации
     calculatorInitialized = false;
     isCalculatorPage = false;
-    initializationAttempts = 0;
+    initializationCalculatorAttempts = 0;
 });
 
 // Запуск инициализации

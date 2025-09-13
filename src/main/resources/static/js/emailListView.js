@@ -245,18 +245,6 @@ async function refreshEmailTable() {
     }
 }
 
-//function escapeHtml(unsafe) {
-//    return unsafe.replace(/[&<>"']/g, function(m) {
-//        return {
-//            '&': '&amp;',
-//            '<': '&lt;',
-//            '>': '&gt;',
-//            '"': '&quot;',
-//            "'": '&#39;'
-//        }[m];
-//    });
-//}
-
 function createAttachmentLink(attachment, emailId) {
 
     const link = document.createElement('a');
